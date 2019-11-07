@@ -22,7 +22,8 @@ body {
 .row {
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
 }
 
 .container {
@@ -70,10 +71,12 @@ a {
   color: white;
 }
 
-link:hover {
+link:hover,
+.quote-item:hover {
   cursor: pointer;
 }
 
+/* ----------------------- find quotes ------------------------*/
 nav {
   width: 100%;
   height: 50px;
@@ -85,20 +88,36 @@ nav {
   padding-right: 20px;
 }
 
+.nav-home {
+  position: absolute;
+  left: 20px;
+}
+
 .nav-item a {
   color: white;
 }
 
-.js-results {
+.search-form {
+  margin-top: 10px;
+}
+
+.results {
+  border: 1px solid green;
   width: 80%;
   max-width: 1000px;
-  margin: 0 auto;
+  margin: 10px auto;
 }
 
 .quote-item {
+  width: 250px;
   border: 1px solid grey;
   border-radius: 10px;
   margin: 10px;
   padding: 5px;
   min-height: 200px; 
+}
+
+/* ----------------------- quote of the day ------------------------*/
+.search-form input {
+  text-align: right;
 }

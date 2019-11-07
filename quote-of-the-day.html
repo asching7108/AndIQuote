@@ -9,10 +9,22 @@
 </head>
 <body>
   <nav role="navigation">
-      <span class="nav-item"><a href="find-quotes.html">Find A Quote I Like</a></span>
-    </nav>
-
+    <span class="nav-home"><a href="index.html">Home</a></span>
+    <span class="nav-item"><a href="find-quotes.html">Find A Quote I Like</a></span>
+  </nav>
+  <main>
+    <form class="js-form search-form">
+      <label for="month">Month</label>
+      <input type="text" id="js-month" name="month">
+      <label for="day">Day</label>
+      <input type="text" id="js-day" name="day">
+      <label for="year">Year</label>
+      <input type="text" id="js-year" name="year">
+      <input type="submit">
+    </form>
+    <section class="js-results results row"></section>
+  </main>
   <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
-  <script src="index.js"></script>
+  <script src="quote-of-the-day.js"></script>
 </body>
 </html>
