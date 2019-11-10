@@ -15,9 +15,9 @@ function getRandomQuote() {
 }
 
 function displayResults(responseJson) {
-  $('.js-quote, .js-author').empty();
-  $('.js-quote').html(`"${responseJson.quote.body}"`);
-  $('.js-author').html(responseJson.quote.author);
+  $('.js-head-quote, .js-head-author').empty();
+  $('.js-head-quote').html(`"${responseJson.quote.body}"`);
+  $('.js-head-author').html(responseJson.quote.author);
 }
 
 $(getRandomQuote);
