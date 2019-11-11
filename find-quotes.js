@@ -8,8 +8,8 @@ const options = {
     'Authorization': `Token token="${apiKey}"`
   })
 };
-var authors = [];
-var tags = [];
+const authors = [];
+const tags = [];
 
 function searchQuotes(currStatus) {
   $('.js-results, .js-bottom-line, .js-err-msg').empty();
@@ -61,11 +61,6 @@ function getMatchedAuthors(searchTerm) {
 }
 
 function getAuthorsAndTags() {
-  const options = {
-    headers: new Headers({
-      'Authorization': `Token token="${apiKey}"`
-    })
-  };
   const url = typesURL;
   fetch(url, options)
     .then(response => {
