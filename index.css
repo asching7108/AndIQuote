@@ -72,6 +72,7 @@ a {
 }
 
 link:hover,
+input[type=button]:hover,
 .btn:hover,
 .quote-item:hover {
   cursor: pointer;
@@ -175,4 +176,8 @@ nav {
 /* ----------------------- quote of the day ------------------------*/
 .search-date {
   text-align: right;
+}
+
+.search-term::-webkit-input-placeholder::before {
+  content: "Search for quotes with keyword, author name or topic";
 }
