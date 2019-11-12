@@ -1,4 +1,5 @@
-.results {
+.results,
+.results-main {
   /*border: 1px solid green;*/
   width: 90%;
   max-width: 1200px;
@@ -6,7 +7,8 @@
   justify-content: center;
 }
 
-.quote-item {
+.quote-item,
+.quote-item-main {
   width: 100%;
   height: fit-content;
   max-width: 360px;
@@ -15,7 +17,8 @@
   align-items: flex-start;
 }
 
-.quote-content {
+.quote-content,
+.quote-content-main {
   width: 100%;
   height: fit-content;
   min-height: 200px;

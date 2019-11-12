@@ -1,6 +1,6 @@
 'use strict'
 
-const d = new Date();
+const MAX_TAG_COUNT_FOR_RANDOM = 75;
 const apiKey = 'bfa731ef5bbb9cde3dd2ef0c60474809';
 const searchURL = 'https://favqs.com/api/quotes';
 const typesURL = 'https://favqs.com/api/typeahead';
@@ -13,7 +13,7 @@ const tags = [];
 const qotdTags = [
   "love",
   "life",
-  "funny",
+  "funny"/*,
   "faith",
   "home",
   "nature",
@@ -22,8 +22,9 @@ const qotdTags = [
   "future",
   "strength",
   "health",
-  "food"
+  "food" */
 ]
+var seed;
 
 function getTags() {
   const url = typesURL;
@@ -45,32 +46,47 @@ function getTags() {
     .catch();
 }
 
-function searchQuotes(seed, tag) {
+async function searchQuotes() {
   $('.js-results').empty();
+  const tagIdx = Math.floor(random() * MAX_TAG_COUNT_FOR_RANDOM);
+  await searchQuoteByTag(tags[tagIdx].name, true);
+  qotdTags.forEach((ele, idx, arr) => {
+    searchQuoteByTag(ele, false);
+  });
+}
+
+function searchQuoteByTag(tag, isMain) {
   const pageCount = tags[tags.findIndex(matchedTagName, tag)].count / 25;
-  const pageNumber = Math.floor(random(seed) * pageCount);
-  getRandomQuote(seed, tag, pageNumber);
+  const pageNumber = Math.floor(random() * pageCount);
+  return getRandomQuoteByTag(tag, pageNumber, isMain);
 }
 
 function matchedTagName(tag) {
   return tag.name == this;
 }
 
-function getRandomQuote(seed, tag, pageNumber) {
+function getRandomQuoteByTag(tag, pageNumber, isMain) {
   const params = {
     filter: tag,
     type: 'tag',
     page: pageNumber
   };
   const url = searchURL + '?' + formatQueryParams(params);
-  fetch(url, options)
+  return fetch(url, options)
     .then(response => {
       if (response.ok) {
         return response.json();
       }
       throw new Error(response.statusText);
     })
-    .then(responseJson => displayResults(responseJson))
+    .then((responseJson) => {
+      if (isMain) {
+        displayResultsMain(responseJson)
+      }
+      else {
+        displayResults(responseJson)
+      }
+    })
     .catch();
 }
 
@@ -80,15 +96,24 @@ function formatQueryParams(params) {
     return queryItems.join('&');
 }
 
+function displayResultsMain(responseJson) {
+  const qIdx = Math.floor(random() * responseJson.quotes.length);
+  $('.js-results-main').append(
+    `<div class="js-result-item-main quote-item-main col" data-url="${parseQuoteDataUrl(responseJson.quotes[qIdx].id)}">
+    <div class="quote-content-main col">
+    <p class="quote-body">"${responseJson.quotes[qIdx].body}"</p>
+    <p class="quote-author">${responseJson.quotes[qIdx].author}</p></div></div>`
+    );
+}
+
 function displayResults(responseJson) {
-  $('.js-results').empty();
-  const qIdx = Math.floor(random(seed) * responseJson.quotes.length);
+  const qIdx = Math.floor(random() * responseJson.quotes.length);
   $('.js-results').append(
-    `<div class="js-result-item quote-item" data-url="${parseQuoteDataUrl(responseJson.quotes[qIdx].id)}">
-    <p>${responseJson.quotes[qIdx].body}</p>
-    <p>${responseJson.quotes[qIdx].author}</p>
-    </div>`
-  );
+    `<div class="js-result-item quote-item col" data-url="${parseQuoteDataUrl(responseJson.quotes[qIdx].id)}">
+    <div class="quote-content col">
+    <p class="quote-body">"${responseJson.quotes[qIdx].body}"</p>
+    <p class="quote-author">${responseJson.quotes[qIdx].author}</p></div></div>`
+    );
 }
 
 function parseQuoteDataUrl(quoteID) {
@@ -97,19 +122,22 @@ function parseQuoteDataUrl(quoteID) {
 }
 
 async function initialize() {
+  const d = new Date();
   $('input[id="js-month"]').val(d.getMonth() + 1);
   $('input[id="js-day"]').val(d.getDate());
   $('input[id="js-year"]').val(d.getFullYear());
-  const seed = `${d.getFullYear()}${d.getMonth()}${d.getDate()}`;
+  seed = `${d.getFullYear()}${d.getMonth() + 1}${d.getDate()}`;
+  console.log(seed);
   await getTags();
-  searchQuotes(seed, "love");
+  searchQuotes();
 }
 
 function watchForm() {
   $('.js-form').submit(event => {
     event.preventDefault();
-    const seed = `${$('input[id="js-year"]').val()}${$('input[id="js-month"]').val()}${$('input[id="js-day"]').val(d)}`;
-    searchQuotes(seed, "love");
+    seed = `${$('input[id="js-year"]').val()}${$('input[id="js-month"]').val()}${$('input[id="js-day"]').val()}`;
+    console.log(seed);
+    searchQuotes();
   });
   $('.js-results').click(event => {
     window.location = $(event.target).closest('.js-result-item').attr('data-url');
@@ -117,8 +145,8 @@ function watchForm() {
   });
 }
 
-function random(seed) {
-    let x = Math.sin(seed++) * 10000;
+function random() {
+    let x = Math.sin(seed) * 10000;
     return x - Math.floor(x);
 }
 
