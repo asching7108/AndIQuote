@@ -8,8 +8,8 @@
   justify-content: center;
 }
 
-.quote-item,
-.quote-item-main {
+.result-box,
+.result-box-main {
   width: 100%;
   height: fit-content;
   max-width: 360px;
@@ -18,8 +18,8 @@
   align-items: flex-start;
 }
 
-.quote-content,
-.quote-content-main {
+.result-item,
+.result-item-main {
   width: 100%;
   height: fit-content;
   min-height: 200px;
@@ -29,12 +29,12 @@
   display: block;
 }
 
-.quote-body {
+.result-body {
   text-align: left;
   margin-bottom: 36px;
 }
 
-.quote-tag {
+.result-tag {
   margin-top: -1em;
   align-self: center;
   background-color: red;
@@ -48,13 +48,13 @@
 }
 
 @media screen and (min-width: 480px) {
-  .quote-item {
+  .result-box {
     width: 45%;
   }
 }
 
 @media screen and (min-width: 900px) {
-  .quote-item {
+  .result-box {
     width: 20%;
   }
 }

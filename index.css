@@ -74,7 +74,7 @@ a {
 link:hover,
 input[type=button]:hover,
 .btn:hover,
-.quote-item:hover {
+.result-item:hover {
   cursor: pointer;
 }
 
