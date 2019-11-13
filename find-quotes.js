@@ -11,29 +11,30 @@ const options = {
 const authors = [];
 const tags = [];
 
-function searchQuotes(currStatus) {
+function searchQuotes(type, searchterm, pageTrack) {
   $('.js-results, .js-bottom-line, .js-err-msg').empty();
-  currStatus.set("currPage", 0);
-  return getQuotes(currStatus);
+  pageTrack.currPage = 1;
+  return getQuotes(type, searchterm, pageTrack);
 }
 
-async function getQuotes(currStatus) {
-  currStatus.set("currPage", currStatus.get("currPage") + 1);
+function getQuotes(type, searchTerm, pageTrack) {
   const params = {
-    type: currStatus.get("type"),
-    page: currStatus.get("currPage")
+    type: type,
+    page: pageTrack.currPage
   };
-  if (currStatus.get("searchTerm")) {
-    params.filter = currStatus.get("searchTerm");
+  if (searchTerm) {
+    params.filter = searchTerm;
   }
   const url = quotesURL + '?' + formatQueryParams(params);
-  console.log(url);
+  console.log(url);  // hold
   return fetch(url, options)
     .then(response => {
       if (response.ok) {
         return {
           responseJson: response.json(),
-          currStatus: currStatus
+          type: type,
+          searchTerm: searchTerm,
+          pageTrack: pageTrack
         };
       }
       throw new Error(response.statusText);
@@ -52,7 +53,10 @@ function getMatchedAuthors(searchTerm) {
       resAuthors.result = "exact";
     }
     if (ele.name_lc.includes(searchTerm)) {
-      resAuthors.matchedAuthors[resAuthors.matchedAuthors.length] = [ele.name, ele.count];
+      resAuthors.matchedAuthors[resAuthors.matchedAuthors.length] = {
+        name: ele.name, 
+        count: ele.count
+      };
       if (resAuthors.result == "none") {
         resAuthors.result = "maybe";
       }
@@ -81,26 +85,13 @@ function formatQueryParams(params) {
 }
 
 function displayResults(res) {
-  console.log(res.currStatus.get("type"));
   return res.responseJson.then(responseJson => {
     $('.js-bottom-line').empty();
     if (responseJson.quotes[0].id == 0) {
-      if (res.currStatus.get("type") == "keyword") {
-        return false;
-      }
-      else {
-        $('.js-err-msg').append('No matched result.');
-      }
+      return false;
     }
-    if (res.currStatus.get("currPage") == 1) {
-      $('.js-filter').find('input').removeClass('selected');
-      $('.js-filter')
-        .find(`input[value="${res.currStatus.get("searchTerm")}"][name="${res.currStatus.get("type")}-filter"]`)
-        .addClass('selected');
-    }
-    let fixedTag = res.currStatus.get("tag");
     for (let i = 0; i < responseJson.quotes.length; i ++) {
-      const tag = fixedTag ? fixedTag : responseJson.quotes[i].tags[0];
+      const tag = res.type == "tag" ? res.searchTerm : responseJson.quotes[i].tags[0];
       $('.js-results').append(
         `<div class="js-result-item quote-item col" data-url="${parseQuoteDataUrl(responseJson.quotes[i].id)}">
         <div class="quote-content col">
@@ -109,13 +100,13 @@ function displayResults(res) {
         <p class="quote-tag">${tag}</p><div>`
       );
     }
-    res.currStatus.set("lastPage", responseJson.last_page);
     if (responseJson.last_page) {
       $('.js-bottom-line').append("<p>You've reached the end.</p>");
     }
     else {
       $('.js-bottom-line').append('Load more');
     }
+    res.pageTrack.lastPage = responseJson.last_page;
     return true;
   });
 }
@@ -142,31 +133,33 @@ function parseQuoteDataUrl(quoteID) {
 }
 
 function watchForm() {
-  var currStatus = new Map();
-  searchHandler(currStatus);
+  let searchTrack = {};
+  let pageTrack = {};
+  searchTrack = searchRandomQuotes(pageTrack);
   // handles search submittion
-  $('.js-submit-btn').click({map: currStatus}, event => {
+  $('.js-submit-btn').click(function(event) {
     event.preventDefault();
-    searchHandler(currStatus);
-  });
-
-  // handles search type selection
-  $('.js-type-select').change(function(event) {
-    $('option').removeAttr('selected');
-    $('.js-type-select').find(`option:contains(${this.value})`).attr('selected', 'selected');
-    if (currStatus.get("searchTerm")) {
-      searchHandler(currStatus);
+    let searchTerm = $('#js-search-term').val().toLowerCase();
+    if (!searchTerm) {
+      searchTrack = searchRandomQuotes(pageTrack);
+    }
+    else {
+      searchWithFilter(searchTerm, pageTrack)
+        .then(res => {
+          searchTrack = res;
+        })
     }
   });
 
   // handles clock on search filters
   $('.js-filter').on('click', 'input[type=button]', function(event) {
-    currStatus.set("searchTerm", this.value);
-    currStatus.set("type", $(this).attr('name').slice(0, $(this).attr('name').indexOf('-')));
-    if (currStatus.get("type") == "tag") {
-      currStatus.set("tag", this.value);
-    }
-    searchQuotes(currStatus);
+    searchTrack.type = $(this).attr('name').slice(0, $(this).attr('name').indexOf('-'));
+    searchTrack.searchTerm = this.value;
+    $('.js-filter').find('input').removeClass('selected');
+    $('.js-filter')
+      .find(`input[value="${searchTrack.searchTerm}"][name="${searchTrack.type}-filter"]`)
+      .addClass('selected');    
+    searchQuotes(searchTrack.type, searchTrack.searchTerm, pageTrack);
   });
 
   // handles click on the quotes
@@ -176,60 +169,76 @@ function watchForm() {
   });
 
   // handles scrolling to the bottom
-  $(window).on('scroll', currStatus, function() {
+  $(window).on('scroll', function() {
     let pos = $(window).scrollTop();
     if (pos + $(window).height() === $(document).height()) {
-      if (!currStatus.get("lastPage")) {
-        getQuotes(currStatus);
+      if (!pageTrack.lastPage) {
+        pageTrack.currPage++;
+        getQuotes(searchTrack.type, searchTrack.searchTerm, pageTrack);  // on hold
       }
     }
   });
 }
 
-function displayFilter(currStatus, resAuthors) {
+function displayFilter(searchTerm, resAuthors) {
   $('.js-filter').empty();
   $('.js-filter').append('<label for="keyword-filter">Keyword:</label>');
-  $('.js-filter').append(`<input type="button" name="keyword-filter" class="filter-btn" value="${currStatus.get("searchTerm")}">`);
+  $('.js-filter').append(`<input type="button" name="keyword-filter" class="filter-btn" value="${searchTerm}">`);
   if (resAuthors.result != "none") {
     $('.js-filter').append('<label for="author-filter">Author:</label>');
     resAuthors.matchedAuthors.forEach(ele => {
-      $('.js-filter').append(`<input type="button" name="author-filter" class="filter-btn" value="${ele[0]}">`);
+      $('.js-filter').append(`<input type="button" name="author-filter" class="filter-btn" value="${ele.name}">`);
     });  
   }
-  if (tags.find(ele => ele.name == currStatus.get("searchTerm"))) {
+  if (tags.find(ele => ele.name == searchTerm)) {
     $('.js-filter').append('<label for="tag-filter">Tag:</label>');
-    $('.js-filter').append(`<input type="button" name="tag-filter" class="filter-btn" value="${currStatus.get("searchTerm")}">`);
+    $('.js-filter').append(`<input type="button" name="tag-filter" class="filter-btn" value="${searchTerm}">`);
   };
 }
 
-function searchHandler(currStatus) {
-  currStatus.set("type", "keyword");
-  currStatus.set("searchTerm", $('#js-search-term').val().toLowerCase());
-  if (!currStatus.get("searchTerm")) {
-    searchQuotes(currStatus);
-    return;
-  }
-  const resAuthors = getMatchedAuthors(currStatus.get("searchTerm"));
-  displayFilter(currStatus, resAuthors);
+function searchRandomQuotes(pageTrack) {
+  searchQuotes("keyword", null, pageTrack)
+    .then(res => {
+      pageTrack.last_page = false;  // on hold
+    });
+    console.log("hi");
+  return { type: "keyword" }
+}
+
+async function searchWithFilter(searchTerm, pageTrack) {
+  let type = "keyword";
+  const resAuthors = getMatchedAuthors(searchTerm);
+  displayFilter(searchTerm, resAuthors);
+  let hasRes;
   if (resAuthors.result == "exact") {
-    currStatus.set("type", "author");
-    currStatus.set("searchTerm", resAuthors.matchedAuthors[0][0]);
-    searchQuotes(currStatus);  
+    type = "author";
+    searchTerm = resAuthors.matchedAuthors[0].name;
+    hasRes = await searchQuotes("author", searchTerm, pageTrack);
   }
   else {
-    searchQuotes(currStatus)
+    hasRes = await searchQuotes("keyword", searchTerm, pageTrack)
       .then(hasRes => {
-        if (!hasRes) {
+        if (!hasRes) {  // no matched results
           if (resAuthors.result == "maybe") {
-            currStatus.set("type", "author");
-            currStatus.set("searchTerm", resAuthors.matchedAuthors[0][0]);
-            searchQuotes(currStatus);  
+            type = "author";
+            searchTerm = resAuthors.matchedAuthors[0].name;
+            searchQuotes("author", searchTerm, pageTrack);
           }
           else {
             $('.js-err-msg').append('No matched result.');
           }
         }
-      }); 
+        return hasRes;
+      });
+  }
+  if (hasRes) {
+    $('.js-filter')
+      .find(`input[value="${searchTerm}"][name="${type}-filter"]`)
+      .addClass('selected');      
+  }
+  return {
+    type: type,
+    searchTerm: searchTerm
   }
 }
 
