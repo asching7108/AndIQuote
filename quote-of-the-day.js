@@ -4,6 +4,9 @@ const MAX_TAG_COUNT_FOR_RANDOM = 75;
 const apiKey = 'bfa731ef5bbb9cde3dd2ef0c60474809';
 const searchURL = 'https://favqs.com/api/quotes';
 const typesURL = 'https://favqs.com/api/typeahead';
+const imgApiKey = '8114a9a6d86e2223ab0959d33e1c59cc5801706d389b206d48f45be1af724b60';
+const imgSearchURL = 'https://api.unsplash.com/photos/random';
+
 const options = {
   headers: new Headers({
     'Authorization': `Token token="${apiKey}"`
@@ -47,9 +50,10 @@ function getTags() {
 }
 
 async function searchQuotes() {
-  $('.js-results').empty();
+  $('.js-results, .js-results-main').empty();
   const tagIdx = Math.floor(random() * MAX_TAG_COUNT_FOR_RANDOM);
   await searchQuoteByTag(tags[tagIdx].name, true);
+  getRandomImg();
   qotdTags.forEach((ele, idx, arr) => {
     searchQuoteByTag(ele, false);
   });
@@ -75,16 +79,19 @@ function getRandomQuoteByTag(tag, pageNumber, isMain) {
   return fetch(url, options)
     .then(response => {
       if (response.ok) {
-        return response.json();
+        return {
+          responseJson: response.json(),
+          tag: tag
+        }
       }
       throw new Error(response.statusText);
     })
-    .then((responseJson) => {
+    .then((res) => {
       if (isMain) {
-        displayResultsMain(responseJson)
+        displayQuote(res)
       }
       else {
-        displayResults(responseJson)
+        displayResults(res)
       }
     })
     .catch();
@@ -96,29 +103,74 @@ function formatQueryParams(params) {
     return queryItems.join('&');
 }
 
-function displayResultsMain(responseJson) {
-  const qIdx = Math.floor(random() * responseJson.quotes.length);
-  $('.js-results-main').append(
-    `<div class="js-result-item-main quote-item-main col" data-url="${parseQuoteDataUrl(responseJson.quotes[qIdx].id)}">
-    <div class="quote-content-main col">
-    <p class="quote-body">"${responseJson.quotes[qIdx].body}"</p>
-    <p class="quote-author">${responseJson.quotes[qIdx].author}</p></div></div>`
+function displayResults(res) {
+  res.responseJson.then(responseJson => {
+    const qIdx = Math.floor(random() * responseJson.quotes.length);
+    $('.js-results').append(
+      `<div class="js-result-box result-box col">
+      <div class="js-result-item result-item col" data-url="${quoteEditorUrl(responseJson.quotes[qIdx].id)}">
+      <p class="result-body">"${responseJson.quotes[qIdx].body}"</p>
+      <p class="result-author">${responseJson.quotes[qIdx].author}</p></div>
+      <p class="result-tag">${res.tag}</p><div>`
     );
+  });
 }
 
-function displayResults(responseJson) {
-  const qIdx = Math.floor(random() * responseJson.quotes.length);
-  $('.js-results').append(
-    `<div class="js-result-item quote-item col" data-url="${parseQuoteDataUrl(responseJson.quotes[qIdx].id)}">
-    <div class="quote-content col">
-    <p class="quote-body">"${responseJson.quotes[qIdx].body}"</p>
-    <p class="quote-author">${responseJson.quotes[qIdx].author}</p></div></div>`
-    );
-}
-
-function parseQuoteDataUrl(quoteID) {
+function quoteEditorUrl(quoteID) {
   const currURL = window.location.href;
   return `${currURL.slice(0, currURL.lastIndexOf("/"))}/quote-editor.html?quoteID=${quoteID}`;
+}
+
+function quoteEditorUrlWithImgID(imgID) {
+  const currURL = window.location.href;
+  return `${currURL.slice(0, currURL.lastIndexOf("/"))}/quote-editor.html?imageID=${imgID}`;
+}
+
+function getRandomImg() {
+  const params = {
+    orientation: "landscape"
+  };
+  const options = {
+    headers: new Headers({
+      'Authorization': `Client-ID ${imgApiKey}`
+    })
+  };
+  const url = imgSearchURL + "?" + formatQueryParams(params);
+  fetch(url, options)
+  .then(response => {
+    if (response.ok) {
+      return response.json();
+    }
+    throw new Error(response.statusText);
+  })
+  .then(responseJson => displayImg(responseJson))
+  .catch();
+}
+
+function displayQuote(res) {
+  res.responseJson.then(responseJson => {
+    const qIdx = Math.floor(random() * responseJson.quotes.length);
+    if ($('.js-editor').attr('data-url')) {
+      $('.js-editor').attr('data-url', `${$('.js-editor').attr('data-url')}&quoteID=${responseJson.quotes[qIdx].id}`);
+    }
+    else {
+      $('.js-editor').attr('data-url', `${quoteEditorUrl(responseJson.quotes[qIdx].id)}`);
+    }
+    $('.js-quote').html(`"${responseJson.quotes[qIdx].body}"`);
+    $('.js-author').html(responseJson.quotes[qIdx].author);
+  });
+}
+
+function displayImg(responseJson) {
+  console.log(responseJson.urls.regular);
+  if ($('.js-editor').attr('data-url')) {
+    $('.js-editor').attr('data-url', `${$('.js-editor').attr('data-url')}&imageID=${responseJson.id}`);
+  }
+  else {
+    $('.js-editor').attr('data-url', `${quoteEditorUrlWithImgID(responseJson.id)}`);
+  }
+$('.js-editor').css('background-image', `url(${responseJson.urls.regular})`);
+  $('.js-editor').css('height', `calc(800px * ${responseJson.height} / ${responseJson.width})`);
 }
 
 async function initialize() {
@@ -139,9 +191,11 @@ function watchForm() {
     console.log(seed);
     searchQuotes();
   });
-  $('.js-results').click(event => {
-    window.location = $(event.target).closest('.js-result-item').attr('data-url');
-    console.log($(event.target).closest('.js-result-item').attr('data-url'));
+  $('.js-results').on('click', '.js-result-item, .js-result-item-main', function(event) {
+    window.location = $(this).attr('data-url');
+  });
+  $('.js-editor').on('click', function(event) {
+    window.location = $(this).attr('data-url');
   });
 }
 

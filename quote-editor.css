@@ -34,17 +34,12 @@ nav {
 }
 
 .nav-item a {
+  margin-left: 20px;
   color: white;
 }
 
-.editor, .quote-img {
-  margin: 10px auto;
-  border: 1px solid green;
-  width: 800px;
-  height: 500px;
-}
-
 .button-container {
+  background: url();
   margin-top: 10px;
   display: flex;
   flex-direction: row;
@@ -52,6 +47,7 @@ nav {
 }
 
 .link {
+  color: white;
   width: 10em;
   height: 2.5em;
   background-color: grey;
@@ -68,6 +64,11 @@ a {
   color: white;
 }
 
-link:hover {
+link:hover,
+.link:hover {
   cursor: pointer;
+}
+
+.save-btn {
+  display: none;
 }

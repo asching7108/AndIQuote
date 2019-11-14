@@ -2,12 +2,26 @@
 
 const quoteApiKey = 'bfa731ef5bbb9cde3dd2ef0c60474809';
 const quoteSearchURL = 'https://favqs.com/api/quotes/';
-const imgApiKey = '563492ad6f917000010000018c60f917160c416cb597a63958ffb391';
-const imgSearchURL = 'https://api.pexels.com/v1/curated/';
+const imgApiKey = '8114a9a6d86e2223ab0959d33e1c59cc5801706d389b206d48f45be1af724b60';
+const imgSearchURL = 'https://api.unsplash.com/photos/random';
+const imgSearchWithIDURL = 'https://api.unsplash.com/photos/';
+const param = {};
 
-function getParam(paramName) {
+function getParam() {
   const url = window.location.href;
-  return url.slice(url.indexOf(`${paramName}`) + paramName.length + 1);
+  let pos = 0;
+  let start = url.indexOf('?', pos) + 1;
+  while (true) {
+    const equal = url.indexOf('=', pos);
+    const end = url.indexOf('&', pos) != -1 ? url.indexOf('&', pos) : url.length;
+    param[url.slice(start, equal)] = url.slice(equal + 1, end);
+    if (end == url.length) {
+      break;
+    }
+    pos = end + 1;
+    start = pos;
+  }
+  console.log(param);
 }
 
 function getQuoteByID() {
@@ -16,7 +30,8 @@ function getQuoteByID() {
       'Authorization': `Token token="${quoteApiKey}"`
     })
   };
-  const url = quoteSearchURL + getParam('quoteID');
+  const url = quoteSearchURL + param.quoteID;
+  console.log(url);
   fetch(url, options)
     .then(response => {
       if (response.ok) {
@@ -30,12 +45,11 @@ function getQuoteByID() {
 
 function getRandomImg() {
   const params = {
-    per_page: 1,
-    page: Math.floor(Math.random() * 1000)
+    orientation: "landscape"
   };
   const options = {
     headers: new Headers({
-      'Authorization': imgApiKey
+      'Authorization': `Client-ID ${imgApiKey}`
     })
   };
   const url = imgSearchURL + "?" + formatQueryParams(params);
@@ -48,7 +62,25 @@ function getRandomImg() {
   })
   .then(responseJson => displayImg(responseJson))
   .catch();
+}
 
+function getImgByID(imageID) {
+  const options = {
+    headers: new Headers({
+      'Authorization': `Client-ID ${imgApiKey}`
+    })
+  };
+  const url = imgSearchWithIDURL + imageID;
+  console.log(url);
+  fetch(url, options)
+  .then(response => {
+    if (response.ok) {
+      return response.json();
+    }
+    throw new Error(response.statusText);
+  })
+  .then(responseJson => displayImg(responseJson))
+  .catch();  
 }
 
 function formatQueryParams(params) {
@@ -58,14 +90,24 @@ function formatQueryParams(params) {
 }
 
 function displayQuote(responseJson) {
-  $('.js-quote').html(responseJson.body);
+  $('.js-quote').html(`"${responseJson.body}"`);
   $('.js-author').html(responseJson.author);
 }
 
 function displayImg(responseJson) {
-  console.log(responseJson.photos[0].url);
-  $('.js-editor').append(`<p>${responseJson.photos[0].url}</p>`);
+  console.log(responseJson.urls.regular);
+  $('.js-editor').css('background-image', `url(${responseJson.urls.regular})`);
+  $('.js-editor').css('height', `calc(800px * ${responseJson.height} / ${responseJson.width})`);
 }
 
+getParam();
 $(getQuoteByID);
-$(getRandomImg);
+if (param.imageID) {
+  getImgByID(param.imageID);
+}
+else {
+  getRandomImg();
+}
+$('.change-btn').click(event => {
+  getRandomImg();
+});

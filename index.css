@@ -27,7 +27,6 @@ body {
 }
 
 .container {
-  border: 1px solid green;
   width: 80vw;
   max-width: 1000px;
   height: 100vh;
@@ -72,8 +71,10 @@ a {
 }
 
 link:hover,
+.editor:hover,
 input[type=button]:hover,
 .btn:hover,
+.result-item-main:hover,
 .result-item:hover {
   cursor: pointer;
 }
@@ -96,6 +97,7 @@ nav {
 }
 
 .nav-item a {
+  margin-left: 10px;
   color: white;
 }
 
@@ -178,6 +180,31 @@ nav {
   text-align: right;
 }
 
-.search-term::-webkit-input-placeholder::before {
-  content: "Search for quotes with keyword, author name or topic";
+.editor {
+  margin: 10px auto;
+  width: 800px;
+}
+
+.editor img {
+  width: 100%;
+}
+
+.quote,
+.author {
+  color: white;
+  text-align: center;
+  -webkit-text-stroke-width: 1px; 
+  -webkit-text-stroke-color: black;
+}
+
+.author:before {
+  content:"";
+  display: inline-block;
+  width: 12px;
+  height: 1px;
+  position: relative;
+  top: -28%;
+  right: 10px;
+  border: 1px solid black;
+  background-color: white;
 }

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="quote-editor.css">
     <title>Document</title>
   </head>
@@ -14,16 +15,17 @@
       <span class="nav-item"><a href="find-quotes.html">Find A Quote I Like</a></span>
     </nav>
     <main>
-      <h1 class="js-quote quote"></h1>
-      <h2 class="js-author author"></h2>
-      <section class="js-editor editor">
-        <img src="https://www.pexels.com/photo/man-sitting-on-cliff-2832078/">
+      <section class="js-editor editor col">
+        <img class="js-img">
+        <h1 class="js-quote quote"></h1>
+        <h2 class="js-author author"></h2>    
       </section>
       <div class="button-container">
-        <span role="button" class="find-quotes-link link col">
+        <span role="button" class="save-btn link col">
           <a href="save-and-share.html">Save And Share</a>
         </span>
-      </div>    
+        <span role="button" class="change-btn link col">Change image</span>
+        </div>    
     </main>
     <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
     <script src="quote-editor.js"></script>
