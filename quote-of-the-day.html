@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <link rel="stylesheet" href="index.css">
-  <link rel="stylesheet" href="find-quotes.css">
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="quote-of-the-day.css">
   <title>Quote Of The Day</title>
 </head>
 <body>
@@ -15,17 +15,19 @@
   </nav>
   <main class="col">
     <form class="js-form search-form row">
-      <div class="date-inputs">
-        <label for="month" class="search-date">Month</label>
-        <input type="text" id="js-month" name="month" class="search-date">
-        <label for="day" class="search-date">Day</label>
-        <input type="text" id="js-day" name="day" class="search-date">
-        <label for="year" class="search-date">Year</label>
-        <input type="text" id="js-year" name="year" class="search-date">    
-      </div>
-      <button type="submit" class="js-submit-btn submit-btn btn">
-        <i class="fas fa-search"></i>
-      </button>
+        <div class="date-selector-box">
+            <select id="js-month" name="month" class="date-selector"></select>
+            <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="date-selector-box">
+            <select id="js-day" name="day" class="date-selector"></select>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="date-selector-box">
+            <select id="js-year" name="year" class="date-selector"></select>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+      <button type="submit" class="js-search-btn search-btn link">Search</button>
     </form>
     <section class="js-editor editor col">
         <img class="js-img">

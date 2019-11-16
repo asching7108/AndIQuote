@@ -6,7 +6,6 @@ const searchURL = 'https://favqs.com/api/quotes';
 const typesURL = 'https://favqs.com/api/typeahead';
 const imgApiKey = '8114a9a6d86e2223ab0959d33e1c59cc5801706d389b206d48f45be1af724b60';
 const imgSearchURL = 'https://api.unsplash.com/photos/random';
-
 const options = {
   headers: new Headers({
     'Authorization': `Token token="${apiKey}"`
@@ -27,6 +26,8 @@ const qotdTags = [
   "health",
   "food" */
 ]
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const d = new Date();
 var seed;
 
 function getTags() {
@@ -174,20 +175,32 @@ $('.js-editor').css('background-image', `url(${responseJson.urls.regular})`);
 }
 
 async function initialize() {
-  const d = new Date();
-  $('input[id="js-month"]').val(d.getMonth() + 1);
-  $('input[id="js-day"]').val(d.getDate());
-  $('input[id="js-year"]').val(d.getFullYear());
+  for (let i = 0; i < 12; i++) {
+    $('#js-month').append(`<option value="${i}">${months[i]}</option>`);
+  }
+  for (let i = 1; i <= 31; i++) {
+    $('#js-day').append(`<option value="${i}">${i}</option>`);
+  }
+  for (let i = d.getFullYear(); i >= d.getFullYear() - 120; i--) {
+    $('#js-year').append(`<option value="${i}">${i}</option>`);
+  }
+  $('#js-month').find(`option[value="${d.getMonth()}"]`).attr('selected', 'selected');
+  $('#js-day').find(`option[value="${d.getDate()}"]`).attr('selected', 'selected');
+  $('#js-year').find(`option[value="${d.getFullYear()}"]`).attr('selected', 'selected');
   seed = `${d.getFullYear()}${d.getMonth() + 1}${d.getDate()}`;
-  console.log(seed);
   await getTags();
   searchQuotes();
 }
 
 function watchForm() {
+  $('#js-month, #js-day, #js-year').change(function(event) {
+    $(this).find('option').removeAttr('selected');
+    $(this).find(`option[value="${this.value}"]`).attr('selected', 'selected');
+  });
+
   $('.js-form').submit(event => {
     event.preventDefault();
-    seed = `${$('input[id="js-year"]').val()}${$('input[id="js-month"]').val()}${$('input[id="js-day"]').val()}`;
+    seed = `${$('#js-year').find('option[selected="selected"]').val()}${$('#js-month').find('option[selected="selected"]').val()}${$('#js-day').find('option[selected="selected"]').val()}`;
     console.log(seed);
     searchQuotes();
   });

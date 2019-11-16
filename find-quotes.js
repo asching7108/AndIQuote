@@ -43,7 +43,7 @@ function searchQuotes(searchTrack, pageTrack) {
 async function searchWithSearchTerm(searchTrack, pageTrack) {
   let q = searchTrack.searchTerm;
   const resAuthors = getMatchedAuthors(q);
-  displayFilter(q, resAuthors);
+  displayFilter(q, resAuthors, false);
   let hasRes; 
   if (resAuthors.result == "exact") {
     searchTrack.type = "author";
@@ -127,18 +127,18 @@ function getMatchedAuthors(searchTerm) {
  * @param {string} searchTerm the search term of the query
  * @param {object} resAuthors an object of the result and the array of matched authors
  */
-function displayFilter(searchTerm, resAuthors) {
+function displayFilter(searchTerm, resAuthors, typeIsTag) {
   $('.js-filter').empty();
-  $('.js-filter').append('<label for="keyword-filter">Keyword:</label>');
+  $('.js-filter').append('<label for="keyword-filter">Keyword : </label>');
   $('.js-filter').append(`<input type="button" name="keyword-filter" class="filter-btn" value="${searchTerm}">`);
-  if (resAuthors.result != "none") {
-    $('.js-filter').append('<label for="author-filter">Author:</label>');
+  if (resAuthors && resAuthors.result != "none") {
+    $('.js-filter').append('<label for="author-filter">Author : </label>');
     resAuthors.matchedAuthors.forEach(ele => {
       $('.js-filter').append(`<input type="button" name="author-filter" class="filter-btn" value="${ele}">`);
     });  
   }
-  if (TAGS.find(ele => ele == searchTerm)) {
-    $('.js-filter').append('<label for="tag-filter">Tag:</label>');
+  if (typeIsTag || TAGS.find(ele => ele == searchTerm)) {
+    $('.js-filter').append('<label for="tag-filter">Tag : </label>');
     $('.js-filter').append(`<input type="button" name="tag-filter" class="filter-btn" value="${searchTerm}">`);
   };
 }
@@ -217,10 +217,10 @@ function displayResults(res) {
       }
       $('.js-results').append(
         `<div class="js-result-box result-box col">
-        <div class="js-result-item result-item col" data-url="${quoteEditorUrl(responseJson.quotes[i].id)}">
+        <div class="js-result-item result-item link col" data-url="${quoteEditorUrl(responseJson.quotes[i].id)}">
         <p class="result-body">"${responseJson.quotes[i].body}"</p>
         <p class="result-author">${responseJson.quotes[i].author}</p></div>
-        <p class="result-tag">${tag}</p><div>`
+        <p class="js-result-tag result-tag link">${tag}</p><div>`
       );
     }
     if (responseJson.last_page) {
@@ -288,7 +288,7 @@ function watchForm() {
   searchQuotes(searchTrack, pageTrack);
 
   // handles search with submit button
-  $('.js-submit-btn').click(event => {
+  $('.js-search-btn').click(event => {
     event.preventDefault();
     searchQuotes(searchTrack, pageTrack);
   });
@@ -301,6 +301,19 @@ function watchForm() {
   // handles click on quotes
   $('.js-results').on('click', '.js-result-item', function(event) {
     window.location = $(this).attr('data-url');
+  });
+
+  // handles click on tags
+  $('.js-results').on('click', '.js-result-tag', function(event) {
+    console.log($(this).html());
+    searchTrack.type = "tag";
+    searchTrack.searchTerm = $(this).html();
+    pageTrack.currPage = 1;
+    getQuotes(searchTrack.type, searchTrack.searchTerm, pageTrack);
+    displayFilter(searchTrack.searchTerm, null, true);
+    $('.js-filter')
+    .find(`input[value="${searchTrack.searchTerm}"][name="${searchTrack.type}-filter"]`)
+    .addClass('selected');
   });
 
   // handles scrolling to the bottom

@@ -1,60 +1,81 @@
-.filter,
-.results,
-.results-main {
-  /*border: 1px solid green;*/
-  width: 90%;
-  max-width: 1200px;
-  margin: 10px auto;
-  justify-content: center;
+.heading-quote {
+  margin: 3em auto 0;
+  font-size: 1.2em;
 }
 
-.result-box,
-.result-box-main {
-  width: 100%;
-  height: fit-content;
-  max-width: 360px;
-  margin: 10px;
-  padding: 0;
-  align-items: flex-start;
+.heading {
+  font-size: 50px;
+  margin: 0.5em;
 }
 
-.result-item,
-.result-item-main {
-  width: 100%;
-  height: fit-content;
-  min-height: 200px;
-  border: 1px solid grey;
-  border-radius: 4px;
-  padding: 0 16px 20px 16px;
-  display: block;
-}
-
-.result-body {
+.search-form {
+  width: 64%;
+  max-width: 640px;
+  margin: 1.5em auto 2.5em;
   text-align: left;
-  margin-bottom: 36px;
 }
 
-.result-tag {
-  margin-top: -1em;
-  align-self: center;
-  background-color: red;
-  color: white;
-  height: 2em;
-  padding: 4px 10px;
+.search-term {
+  height: 50px;
+  width: calc(100% - 50px);
+  padding-left: 10px;
+  font-size: 1em;
+  border: 1px solid #D70015;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
 }
 
-.selected {
-  background-color: red;
+.search-btn {
+  width: 50px;
+  height: 50px;
+  font-size: 1.2em;
+  background-color: #D70015;
+  border: 1px solid #D70015;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
 }
 
-@media screen and (min-width: 480px) {
-  .result-box {
-    width: 45%;
-  }
+.fa-search:before {
+  font-family: FontAwesome;
+  font-style: normal;
+  font-weight: normal;
+  content: "\f002";
+  display: inline-block;
+  color: #FFFFFF;
+}
+
+.filter {
+  /*border: 1px solid green;*/
+  width: 80%;
+  max-width: 1000px;
+  margin: 10px auto;
+  justify-content: flex-start;
+}
+
+.js-filter label,
+.js-filter input {
+  margin: 3px;
+}
+
+.js-filter input {
+  font-size: 0.9em;
+  border-radius: 5px;
+  border: none;
+}
+
+.js-filter .selected {
+  background-color: #D70015;
+  color: #FFFFFF;
+  font-weight: bold;
+}
+
+.js-filter input:hover {
+  background-color: #D70015;
+  color: #FFFFFF;
+  font-weight: bold;
 }
 
 @media screen and (min-width: 900px) {
-  .result-box {
-    width: 20%;
+  .filter {
+    width: 75%;
   }
-}

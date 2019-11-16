@@ -1,0 +1,176 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #1C1C1E;
+  background: -webkit-linear-gradient(rgba(28, 28, 30, 0.1), rgba(28, 28, 30, 0.8)), 
+    -webkit-linear-gradient(rgba(28, 28, 30, 0.5), rgba(28, 28, 30, 0.3)), 
+    url(ingmar-hoogerhoud-4_iKPdgfA24-unsplash.jpg);
+  background-position: center center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  font-family: "Helvetica Neue", "Helvetica", "Roboto", sans-serif;
+  font-weight: normal;
+  color: #FFFFFF;
+  letter-spacing: .024em;
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+  margin: 0;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+a {
+  text-decoration: none;
+  color: #FFFFFF;
+}
+
+em {
+  color: #96FFD1;
+}
+
+nav {
+  width: 100%;
+  height: 50px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 20px;
+}
+
+.nav-home {
+  font-family: 'Tomorrow', sans-serif;
+  font-size: 24px;
+  font-weight: bold;
+  position: absolute;
+  left: 20px;
+}
+
+.nav-item {
+  font-family: 'Tomorrow', sans-serif;
+  font-size: 18px;
+  margin-left: 10px;
+}
+
+.nav-home a,
+.nav-item a {
+  -webkit-transition: color 0.5s;
+  -moz-transition: color 0.5s;
+  -o-transition: color 0.5s;
+  transition: color 0.5s;
+}
+
+.search-form {
+  width: 64%;
+  max-width: 640px;
+  margin: 1.5em auto 2.5em;
+  justify-content: space-between;
+  text-align: left;
+}
+
+.results,
+.results-main {
+  width: 90%;
+  max-width: 1200px;
+  margin: 10px auto;
+  justify-content: center;
+}
+
+.result-box,
+.result-box-main {
+  width: 100%;
+  height: fit-content;
+  margin: 10px;
+  padding: 0;
+  align-items: flex-start;
+}
+
+.result-box {
+  -webkit-transition: transform 0.5s;
+  -moz-transition: transform 0.5s;
+  -o-transition: transform 0.5s;
+  transition: transform 0.5s;
+}
+
+.result-item,
+.result-item-main {
+  width: 100%;
+  height: fit-content;
+  min-height: 200px;
+  border: 1px solid #FFFFFF;
+  border-radius: 10px;
+  padding: 0 16px 20px 16px;
+  display: block;
+  color: #FFFFFF;
+}
+
+.result-body {
+  text-align: left;
+  margin-bottom: 36px;
+}
+
+.result-tag {
+  margin-top: -1em;
+  align-self: center;
+  background-color: #D70015;
+  color: #FFFFFF;
+  height: 2em;
+  border-radius: 1em;
+  padding: 4px 10px;
+  text-transform: uppercase;
+}
+
+link:focus,
+input:focus,
+button:focus {
+  outline: 0;
+}
+
+link:hover,
+.link:hover,
+input[type=button]:hover {
+  cursor: pointer;
+}
+
+.nav-home a:hover {
+  color: #D70015;
+}
+
+.nav-item a:hover {
+  color: #96FFD1;
+}
+
+.result-box:hover {
+  transform: translateY(-3px);
+}
+
+@media screen and (min-width: 480px) {
+  .result-box {
+    width: 45%;
+  }
+}
+
+@media screen and (min-width: 900px) {
+  .result-box {
+    width: 20%;
+  }
+}
