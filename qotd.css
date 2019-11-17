@@ -42,11 +42,23 @@
   color: #FFFFFF;
 }
 
-.editor {
-  margin: 10px auto;
-  width: 800px;
+.qotd-title {
+  font-size: 1.2em;
+  color: #96FFD1;
+  margin: 15px;
 }
 
-.editor img {
-  width: 100%;
+.qotd {
+  width: 85%;
+  max-width: 800px;
+  margin: 25px auto;
+  -webkit-background-size: contain;
+  -moz-background-size: contain;
+  -o-background-size: contain;
+  background-size: contain;
+}
+
+.qotd-body,
+.qotd-author {
+  text-shadow: 2px 2px 2px #8E8E93;
 }

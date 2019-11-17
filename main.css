@@ -38,6 +38,12 @@ body {
   flex-wrap: wrap;
 }
 
+main {
+  border: 1px solid green;
+  margin: 0 auto;
+  width: 90%;
+}
+
 a {
   text-decoration: none;
   color: #FFFFFF;
@@ -80,18 +86,18 @@ nav {
 }
 
 .search-form {
-  width: 64%;
+  width: 70%;
   max-width: 640px;
-  margin: 1.5em auto 2.5em;
+  margin: 20px auto;
   justify-content: space-between;
   text-align: left;
 }
 
 .results,
 .results-main {
-  width: 90%;
+  width: 100%;
   max-width: 1200px;
-  margin: 10px auto;
+  margin: 20px auto;
   justify-content: center;
 }
 
@@ -99,7 +105,7 @@ nav {
 .result-box-main {
   width: 100%;
   height: fit-content;
-  margin: 10px;
+  margin: 15px;
   padding: 0;
   align-items: flex-start;
 }
@@ -165,7 +171,7 @@ input[type=button]:hover {
 
 @media screen and (min-width: 480px) {
   .result-box {
-    width: 45%;
+    width: 42%;
   }
 }
 

@@ -26,7 +26,20 @@ const qotdTags = [
   "health",
   "food" */
 ]
-const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const months = [
+  ["Jan", "January"],
+  ["Feb", "February"],
+  ["Mar", "March"],
+  ["Apr", "April"],
+  ["May", "May"],
+  ["Jun", "June"],
+  ["Jul", "July"],
+  ["Aug", "August"],
+  ["Sep", "September"],
+  ["Oct", "October"],
+  ["Nov", "November"],
+  ["Dec", "December"]
+];
 const d = new Date();
 var seed;
 
@@ -50,9 +63,14 @@ function getTags() {
     .catch();
 }
 
-async function searchQuotes() {
+async function searchQuotes(month, day, year) {
   $('.js-results, .js-results-main').empty();
+  month = month < 10 ? "0" + month : month;
+  day = day < 10 ? "0" + day : day;
+  seed = year.toString().concat(month, day);
+  console.log(seed);
   const tagIdx = Math.floor(random() * MAX_TAG_COUNT_FOR_RANDOM);
+  $('.js-qotd-date').html(`- Quote of ${months[month][1]} ${day}, ${year} -`);
   await searchQuoteByTag(tags[tagIdx].name, true);
   getRandomImg();
   qotdTags.forEach((ele, idx, arr) => {
@@ -151,32 +169,33 @@ function getRandomImg() {
 function displayQuote(res) {
   res.responseJson.then(responseJson => {
     const qIdx = Math.floor(random() * responseJson.quotes.length);
-    if ($('.js-editor').attr('data-url')) {
-      $('.js-editor').attr('data-url', `${$('.js-editor').attr('data-url')}&quoteID=${responseJson.quotes[qIdx].id}`);
+    if ($('.js-qotd').attr('data-url')) {
+      $('.js-qotd').attr('data-url', `${$('.js-qotd').attr('data-url')}&quoteID=${responseJson.quotes[qIdx].id}`);
     }
     else {
-      $('.js-editor').attr('data-url', `${quoteEditorUrl(responseJson.quotes[qIdx].id)}`);
+      $('.js-qotd').attr('data-url', `${quoteEditorUrl(responseJson.quotes[qIdx].id)}`);
     }
-    $('.js-quote').html(`"${responseJson.quotes[qIdx].body}"`);
-    $('.js-author').html(responseJson.quotes[qIdx].author);
+    $('.js-qotd-body').html(`"${responseJson.quotes[qIdx].body}"`);
+    $('.js-qotd-author').html(`- ${responseJson.quotes[qIdx].author}`);
   });
 }
 
 function displayImg(responseJson) {
   console.log(responseJson.urls.regular);
-  if ($('.js-editor').attr('data-url')) {
-    $('.js-editor').attr('data-url', `${$('.js-editor').attr('data-url')}&imageID=${responseJson.id}`);
+  if ($('.js-qotd').attr('data-url')) {
+    $('.js-qotd').attr('data-url', `${$('.js-qotd').attr('data-url')}&imageID=${responseJson.id}`);
   }
   else {
-    $('.js-editor').attr('data-url', `${quoteEditorUrlWithImgID(responseJson.id)}`);
+    $('.js-qotd').attr('data-url', `${quoteEditorUrlWithImgID(responseJson.id)}`);
   }
-$('.js-editor').css('background-image', `url(${responseJson.urls.regular})`);
-  $('.js-editor').css('height', `calc(800px * ${responseJson.height} / ${responseJson.width})`);
+$('.js-qotd').css('background-image', `url(${responseJson.urls.regular})`);
+$('.js-qotd').css('--ratio', responseJson.height / responseJson.width);
+$('.js-qotd').css('height', `calc(${$('.js-qotd').css('width')} * ${responseJson.height} / ${responseJson.width})`);  
 }
 
 async function initialize() {
   for (let i = 0; i < 12; i++) {
-    $('#js-month').append(`<option value="${i}">${months[i]}</option>`);
+    $('#js-month').append(`<option value="${i}">${months[i][0]}</option>`);
   }
   for (let i = 1; i <= 31; i++) {
     $('#js-day').append(`<option value="${i}">${i}</option>`);
@@ -187,28 +206,33 @@ async function initialize() {
   $('#js-month').find(`option[value="${d.getMonth()}"]`).attr('selected', 'selected');
   $('#js-day').find(`option[value="${d.getDate()}"]`).attr('selected', 'selected');
   $('#js-year').find(`option[value="${d.getFullYear()}"]`).attr('selected', 'selected');
-  seed = `${d.getFullYear()}${d.getMonth() + 1}${d.getDate()}`;
   await getTags();
-  searchQuotes();
+  searchQuotes(d.getMonth(), d.getDate(), d.getFullYear());
 }
 
 function watchForm() {
+  // handles selection changes
   $('#js-month, #js-day, #js-year').change(function(event) {
     $(this).find('option').removeAttr('selected');
     $(this).find(`option[value="${this.value}"]`).attr('selected', 'selected');
   });
 
+  // handles search with submit button
   $('.js-form').submit(event => {
     event.preventDefault();
-    seed = `${$('#js-year').find('option[selected="selected"]').val()}${$('#js-month').find('option[selected="selected"]').val()}${$('#js-day').find('option[selected="selected"]').val()}`;
-    console.log(seed);
-    searchQuotes();
+    searchQuotes($('#js-month').find('option[selected="selected"]').val(), 
+    $('#js-day').find('option[selected="selected"]').val(), 
+    $('#js-year').find('option[selected="selected"]').val());
   });
+
   $('.js-results').on('click', '.js-result-item, .js-result-item-main', function(event) {
     window.location = $(this).attr('data-url');
   });
   $('.js-editor').on('click', function(event) {
     window.location = $(this).attr('data-url');
+  });
+  $(window).resize(function() {
+    $('.js-qotd').css('height', parseFloat($('.js-qotd').css('width')) * parseFloat($('.js-qotd').css('--ratio')));  
   });
 }
 
