@@ -6,7 +6,7 @@ body {
   background-color: #1C1C1E;
   background: -webkit-linear-gradient(rgba(28, 28, 30, 0.1), rgba(28, 28, 30, 0.8)), 
     -webkit-linear-gradient(rgba(28, 28, 30, 0.5), rgba(28, 28, 30, 0.3)), 
-    url(ingmar-hoogerhoud-4_iKPdgfA24-unsplash.jpg);
+    url(bg-reg.jpeg);
   background-position: center center;
   background-attachment: fixed;
   background-repeat: no-repeat;
@@ -19,8 +19,9 @@ body {
   color: #FFFFFF;
   letter-spacing: .024em;
   -webkit-font-smoothing: antialiased;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5;
+  overflow-wrap: break-word;
   text-align: center;
   margin: 0;
 }
@@ -39,8 +40,7 @@ body {
 }
 
 main {
-  border: 1px solid green;
-  margin: 0 auto;
+  margin: 0 auto 50px;
   width: 90%;
 }
 
@@ -53,44 +53,49 @@ em {
   color: #96FFD1;
 }
 
+.fas:before {
+  font-family: FontAwesome;
+  font-style: normal;
+  font-weight: normal;
+}
+
 nav {
   width: 100%;
-  height: 50px;
+  height: auto;
   display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
+  flex-direction: column;
+  justify-content: stretch;
   align-items: center;
-  padding-right: 20px;
+}
+
+.nav-home,
+.nav-item {
+  font-family: 'Tomorrow', sans-serif;
+  margin: 10px 20px;
 }
 
 .nav-home {
-  font-family: 'Tomorrow', sans-serif;
   font-size: 24px;
   font-weight: bold;
-  position: absolute;
-  left: 20px;
 }
 
 .nav-item {
-  font-family: 'Tomorrow', sans-serif;
   font-size: 18px;
+}
+
+.fa-arrow-right:before {
+  content: "\f061";
+  color: #FFFFFF;
   margin-left: 10px;
 }
 
 .nav-home a,
-.nav-item a {
+.nav-item a,
+.nav-item a .fas:before {
   -webkit-transition: color 0.5s;
   -moz-transition: color 0.5s;
   -o-transition: color 0.5s;
   transition: color 0.5s;
-}
-
-.search-form {
-  width: 70%;
-  max-width: 640px;
-  margin: 20px auto;
-  justify-content: space-between;
-  text-align: left;
 }
 
 .results,
@@ -135,13 +140,14 @@ nav {
 }
 
 .result-tag {
+  font-size: 0.8em;
   margin-top: -1em;
   align-self: center;
   background-color: #D70015;
   color: #FFFFFF;
   height: 2em;
   border-radius: 1em;
-  padding: 4px 10px;
+  padding: 0.2em 1em;
   text-transform: uppercase;
 }
 
@@ -161,7 +167,8 @@ input[type=button]:hover {
   color: #D70015;
 }
 
-.nav-item a:hover {
+.nav-item a:hover,
+.nav-item a:hover .fas:before {
   color: #96FFD1;
 }
 
@@ -172,6 +179,27 @@ input[type=button]:hover {
 @media screen and (min-width: 480px) {
   .result-box {
     width: 42%;
+  }
+}
+
+@media screen and (min-width: 640px) {
+
+}
+
+@media screen and (min-width: 800px) {
+  nav {
+    height: 50px;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .nav-home {
+    position: absolute;
+    top: -2.5px;
+    left: 0;
+  }
+  .nav-item a i {
+    display: none;
   }
 }
 

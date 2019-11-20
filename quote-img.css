@@ -1,0 +1,55 @@
+
+
+.editor, .quote-img {
+  margin: 10px auto;
+  border: 1px solid green;
+  width: 800px;
+  height: 500px;
+}
+
+.button-container {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.link {
+  width: 10em;
+  height: 2.5em;
+  background-color: grey;
+  border: 1px solid black;
+  border-radius: 5px;
+  text-align: center;
+  margin: 5px;
+}
+
+a {
+  text-decoration: none;
+}
+.link a {
+  color: white;
+}
+
+link:hover {
+  cursor: pointer;
+}
+
+#qotdCanvas {
+  max-width: 800px;
+  margin: 25px auto;
+  -webkit-background-size: contain;
+  -moz-background-size: contain;
+  -o-background-size: contain;
+  background-size: contain;
+}
+
+.qotd-img {
+  display: block;
+  position: absolute;
+  z-index: -1;
+}
+
+#qotdCanvas {
+  display: none;
+}

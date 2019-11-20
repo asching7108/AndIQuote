@@ -1,113 +1,18 @@
 'use strict'
 
-const API_KEY = 'bfa731ef5bbb9cde3dd2ef0c60474809';
-const GET_QUOTE_URL = 'https://favqs.com/api/quotes';
-const GET_TYPE_URL = 'https://favqs.com/api/typeahead';
-const OPTIONS = {
-  headers: new Headers({
-    'Authorization': `Token token="${API_KEY}"`
-  })
-};
-const AUTHORS = [];
-const TAGS = [];
-
-/**
- * If the there's no search term entered, search for random quotes,
- * otherwise search for quotes matching the search term.
- * 
- * @param {object} searchTrack the search query tracker
- * @param {object} pageTrack the page tracker
- */
-function searchQuotes(searchTrack, pageTrack) {
-  searchTrack.type = "keyword";
-  searchTrack.searchTerm = $('#js-search-term').val().toLowerCase();
-  pageTrack.currPage = 1;
-  if (!searchTrack.searchTerm) {
-    getQuotes("keyword", null, pageTrack);
-  }
-  else {
-    searchWithSearchTerm(searchTrack, pageTrack);
-  }
-}
-
-/**
- * Searchs for quotes with the search term by the following steps:
- *   1. If an exactly matched author name is found, search by the author.
- *   2. Else if search by keyword has results, search by keyword.
- *   3. Else if author names containing the keyword are found, search by the first author.
- *   4. Else display a message of no matched results.
- * 
- * @param {object} searchTrack the search query tracker
- * @param {object} pageTrack the page tracker
- */
-async function searchWithSearchTerm(searchTrack, pageTrack) {
-  let q = searchTrack.searchTerm;
-  const resAuthors = getMatchedAuthors(q);
-  displayFilter(q, resAuthors, false);
-  let hasRes; 
-  if (resAuthors.result == "exact") {
-    searchTrack.type = "author";
-    q = resAuthors.matchedAuthors[0];
-    hasRes = await getQuotes("author", q, pageTrack);
-  }
-  else {
-    hasRes = await getQuotes("keyword", q, pageTrack)
-      .then(hasRes => {
-        if (!hasRes) {
-          if (resAuthors.result == "maybe") {
-            searchTrack.type = "author";
-            q = resAuthors.matchedAuthors[0];
-            getQuotes("author", q, pageTrack);
-          }
-          else {
-            $('.js-err-msg').append('No matched result.');
-          }
-        }
-        return hasRes;
-      });
-  }
-  $('.js-filter')
-    .find(`input[value="${q}"][name="${searchTrack.type}-filter"]`)
-    .addClass('selected');
-  searchTrack.searchTerm = q;
-}
-
-/**
- * Updates the selected status of filters and searchs for quotes matching 
- * the selected filter.
- * 
- * @param {*} event the click-on-filter event
- * @param {object} searchTrack the search query tracker
- * @param {object} pageTrack the page tracker
- */
-function searchByFilter(event, searchTrack, pageTrack) {
-  searchTrack.type = $(event.target).attr('name').slice(0, $(event.target).attr('name').indexOf('-'));
-  searchTrack.searchTerm = event.target.value;
-  pageTrack.currPage = 1;
-  $('.js-filter').find('input').removeClass('selected');
-  $('.js-filter')
-    .find(`input[value="${searchTrack.searchTerm}"][name="${searchTrack.type}-filter"]`)
-    .addClass('selected');
-  getQuotes(searchTrack.type, searchTrack.searchTerm, pageTrack)
-    .then(hasRes => {
-      if (!hasRes) {
-        $('.js-err-msg').append('No matched result.');
-      }
-    });
-}
-
 /**
  * Returns an array of authors containing the search term.
  * 
  * @param {string} searchTerm the search term of the query
+ * @param {array} authors the array of all authors
  * @returns {object} an object of the result and the array of matched authors
  */
-function getMatchedAuthors(searchTerm) {
+function getMatchedAuthors(searchTerm, authors) {
   const resAuthors = {
     result: "none",
     matchedAuthors: []
   };
-  AUTHORS.forEach((ele) => {
+  authors.forEach((ele) => {
     if (ele.name_lc.includes(searchTerm)) {
       if (ele.name_lc == searchTerm) {
         resAuthors.result = "exact";
@@ -126,8 +31,9 @@ function getMatchedAuthors(searchTerm) {
  * 
  * @param {string} searchTerm the search term of the query
  * @param {object} resAuthors an object of the result and the array of matched authors
+ * @param {string} tag the tag that matchs the searchTerm
  */
-function displayFilter(searchTerm, resAuthors, typeIsTag) {
+function displayFilter(searchTerm, resAuthors, tag) {
   $('.js-filter').empty();
   $('.js-filter').append('<label for="keyword-filter">Keyword : </label>');
   $('.js-filter').append(`<input type="button" name="keyword-filter" class="filter-btn" value="${searchTerm}">`);
@@ -137,201 +43,240 @@ function displayFilter(searchTerm, resAuthors, typeIsTag) {
       $('.js-filter').append(`<input type="button" name="author-filter" class="filter-btn" value="${ele}">`);
     });  
   }
-  if (typeIsTag || TAGS.find(ele => ele == searchTerm)) {
+  if (tag) {
     $('.js-filter').append('<label for="tag-filter">Tag : </label>');
     $('.js-filter').append(`<input type="button" name="tag-filter" class="filter-btn" value="${searchTerm}">`);
   };
 }
 
 /**
- * Calls FavQs API: ListQuotes to retrieve quotes matching the query.
+ * Searchs for quotes with the search term by the following steps:
+ *   1. If an exactly matched author name is found, search by the author.
+ *   2. Else if search by keyword has results, search by keyword.
+ *   3. Else if author names containing the keyword are found, search by the first author.
+ *   4. Else display a message of no matched results.
  * 
- * @param {string} type the search type of the query
- * @param {string} searchterm the search term of the query
- * @param {object} pageTrack the page tracker
- * @returns {Promise} Promise object represents the result of the query
+ * @param {object} s the search query tracker
+ * @param {object} p the page tracker
+ * @param {array} authors the array of all authors
+ * @param {array} tags the array of all tags
  */
-async function getQuotes(type, searchTerm, pageTrack) {
-  if (pageTrack.currPage == 1) {
-    $('.js-results, .js-bottom-line, .js-err-msg').empty();
+function searchWithSearchTerm(s, p, authors, tags) {
+  const resAuthors = getMatchedAuthors(s.searchTerm, authors);
+  const tag = tags.find(ele => ele.name == s.searchTerm);
+  displayFilter(s.searchTerm, resAuthors, tag);
+  let promise;
+  if (resAuthors.result == "exact") {
+    s.type = "author";
+    s.searchTerm = resAuthors.matchedAuthors[0];
+    promise = newSearch(s.type, s.searchTerm, p);
   }
-  const params = {
-    type: type,
-    page: pageTrack.currPage
-  };
-  if (searchTerm) {
-    params.filter = searchTerm;
+  else {
+    promise = newSearch(s.type, s.searchTerm, p)
+      .then(res => {
+        if (!res) {
+          if (resAuthors.result == "maybe") {
+            s.type = "author";
+            s.searchTerm = resAuthors.matchedAuthors[0];
+            newSearch(s.type, s.searchTerm, p);
+          }
+          else {
+            $('.js-err-msg').append('No matched result.');
+          }
+        }
+      });
   }
-  const url = GET_QUOTE_URL + '?' + formatQueryParams(params);
-  return fetch(url, OPTIONS)
-    .then(response => {
-      if (response.ok) {
-        const res = {
-          responseJson: response.json(),
-          pageTrack: pageTrack
-        };
-        if (type == "tag") {
-          res.tag = searchTerm;
-        }
-        return res;
-      }
-      throw new Error(response.statusText);
-    })
-    .then(res => displayResults(res))
-    .catch();
-}
-
-/**
- * Returns a formatted string of parameter keys and values joined by '&'.
- * 
- * @param {object} params the parameters of the query
- * @returns {string} the formatted string of the parameters
- */
-function formatQueryParams(params) {
-  const queryItems = Object.keys(params)
-    .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`);
-    return queryItems.join('&');
-}
-
-/**
- * Displays the quotes of the query and returns the result.
- *  
- * @param {object} res an object of the response in JSON, the tag and the page tracker
- * @returns {Promise} Promise object represents the result of the query
- */
-function displayResults(res) {
-  return res.responseJson.then(responseJson => {
-    $('.js-bottom-line').empty();
-    if (responseJson.quotes[0].id == 0) {
-      return false;
-    }
-    for (let i = 0; i < responseJson.quotes.length; i ++) {
-      let tag = res.tag;
-      if (!res.tag) {
-        if (responseJson.quotes[i].tags[0]) {
-          tag = responseJson.quotes[i].tags[0];
-        }
-        else {
-          tag = "general";
-        }
-      }
-      $('.js-results').append(
-        `<div class="js-result-box result-box col">
-        <div class="js-result-item result-item link col" data-url="${quoteEditorUrl(responseJson.quotes[i].id)}">
-        <p class="result-body">"${responseJson.quotes[i].body}"</p>
-        <p class="result-author">${responseJson.quotes[i].author}</p></div>
-        <p class="js-result-tag result-tag link">${tag}</p><div>`
-      );
-    }
-    if (responseJson.last_page) {
-      $('.js-bottom-line').append("<p>You've reached the end.</p>");
-    }
-    else {
-      $('.js-bottom-line').append('Load more');
-    }
-    res.pageTrack.lastPage = responseJson.last_page;
-    return true;
+  promise.then(res => {
+    $('.js-filter')
+    .find(`input[value="${s.searchTerm}"][name="${s.type}-filter"]`)
+    .addClass('selected');  
   });
 }
 
 /**
- * Returns the url of the quote editor with the given quote id.
+ * Performs a new search and returns the result.
  * 
- * @param {string} quoteID the quote id
- * @returns {string} the url of the quote editor with quote id
+ * @param {string} type the type of the query
+ * @param {string} searchTerm the searchTerm of the query
+ * @param {object} p the page tracker
+ * @returns {boolean} the result of the search
  */
-function quoteEditorUrl(quoteID) {
-  const currURL = window.location.href;
-  return `${currURL.slice(0, currURL.lastIndexOf("/"))}/quote-editor.html?quoteID=${quoteID}`;
-}
-
-/**
- * Calls FavQs API: Typeahead to retrieve all authurs and tags.
- */
-function getAuthorsAndTags() {
-  fetch(GET_TYPE_URL, OPTIONS)
-    .then(response => {
-      if (response.ok) {
-        return response.json();
+function newSearch(type, searchTerm, p) {
+  p.currPage = 1;
+  return getQuotes(type, searchTerm, 1)
+    .then(res => {
+      $('.js-results, .js-bottom-line, .js-err-msg').empty();
+      if (res.quotes[0].id == 0) {
+        return false;
       }
-      throw new Error(response.statusText);
-    })
-    .then(responseJson => parseAuthorsAndTags(responseJson))
-    .catch();
+      displayResults(res, type, searchTerm, p);
+      return true;
+    });
 }
 
 /**
- * Parses and stores the retrieved data from Typeahead.
+ * Gets quotes on the next page.
  * 
- * @param {object} responseJson the response in JSON
+ * @param {string} type the type of the query
+ * @param {string} searchTerm the searchTerm of the query
+ * @param {object} p the page tracker
  */
-function parseAuthorsAndTags(responseJson) {
-  for (let i = 0; i < responseJson.authors.length; i++) {
-    AUTHORS[AUTHORS.length] = {
-      name: responseJson.authors[i].name,
-      name_lc: responseJson.authors[i].name.toLowerCase()
-    };
-  }
-  for (let i = 0; i < responseJson.tags.length; i++) {
-    TAGS[TAGS.length] = responseJson.tags[i].name;
-  }
+function nextPage(type, searchTerm, p) {
+  p.currPage++;
+  getQuotes(type, searchTerm, p.currPage)
+    .then(res => {
+      $('.js-bottom-line').empty();
+      displayResults(res, type, searchTerm, p);
+    });
 }
 
 /**
- * Watches for and handles event triggers.
+ * Displays the quotes of the query.
+ * 
+ * @param {object} res the response in JSON
+ * @param {string} type the type of the query
+ * @param {string} searchTerm the searchTerm of the query
+ * @param {object} p the page tracker
  */
-function watchForm() {
-  let searchTrack = { type: "keyword" };
-  let pageTrack = { currPage: 1 };
+function displayResults(res, type, searchTerm, p) {
+  const tag = type == "tag" ? searchTerm : null;
+  for (let i = 0; i < res.quotes.length; i++) {
+    addQuote(res, tag, i);
+  }
+  if (res.last_page) {
+    $('.js-bottom-line').html("<p>You've reached the end.</p>");
+  }
+  else {
+    $('.js-bottom-line').html('Load more');
+  }
+  p.lastPage = res.last_page;
+}
 
-  // initializes with a random search
-  searchQuotes(searchTrack, pageTrack);
-
-  // handles search with submit button
+/**
+ * Handles search submittion events:
+ *   if there's no search term entered, search for random quotes,
+ *   otherwise search for quotes with the search term.
+ * 
+ * @param {object} s the search query tracker
+ * @param {object} p the page tracker
+ * @param {array} authors the array of all authors
+ * @param {array} tags the array of all tags
+ */
+function submitHandler(s, p, authors, tags) {
   $('.js-search-btn').click(event => {
     event.preventDefault();
-    searchQuotes(searchTrack, pageTrack);
+    s.type = "keyword";
+    s.searchTerm = $('#js-search-term').val().toLowerCase();
+    if (!s.searchTerm) {
+      newSearch(s,type, s.searchTerm, p);
+    }
+    else {
+      searchWithSearchTerm(s, p, authors, tags);
+    }
   });
+}
 
-  // handles click on search filters
+/**
+ * Handles clicking on filter events:
+ *   search for quotes of the selected filter.
+ * 
+ * @param {object} s the search query tracker
+ * @param {object} p the page tracker
+ */
+function selectFilterHandler(s, p) {
   $('.js-filter').on('click', 'input[type=button]', function(event) {
-    searchByFilter(event, searchTrack, pageTrack);
-  });
-
-  // handles click on quotes
-  $('.js-results').on('click', '.js-result-item', function(event) {
-    window.location = $(this).attr('data-url');
-  });
-
-  // handles click on tags
-  $('.js-results').on('click', '.js-result-tag', function(event) {
-    console.log($(this).html());
-    searchTrack.type = "tag";
-    searchTrack.searchTerm = $(this).html();
-    pageTrack.currPage = 1;
-    getQuotes(searchTrack.type, searchTrack.searchTerm, pageTrack);
-    displayFilter(searchTrack.searchTerm, null, true);
+    s.type = $(this).attr('name').slice(0, $(this).attr('name').indexOf('-'));
+    s.searchTerm = this.value;
+    $('.js-filter').find('input').removeClass('selected');
     $('.js-filter')
-    .find(`input[value="${searchTrack.searchTerm}"][name="${searchTrack.type}-filter"]`)
-    .addClass('selected');
-  });
+      .find(`input[value="${s.searchTerm}"][name="${s.type}-filter"]`)
+      .addClass('selected');
+    newSearch(s.type, s.searchTerm, p)
+      .then(res => {
+        if (!res) {
+          $('.js-err-msg').append('No matched result.');
+        }
+      });
+  });  
+}
 
-  // handles scrolling to the bottom
+/**
+ * Handles clicking on tag event:
+ *   search for quotes of the selected tag.
+ * 
+ * @param {object} s the search query tracker
+ * @param {object} p the page tracker
+ */ 
+function selectTagHandler(s, p) {
+  $('.js-results').on('click', '.js-result-tag', function(event) {
+    s.type = "tag";
+    s.searchTerm = $(this).html();
+    displayFilter(s.searchTerm, null, s.searchTerm);
+    $('.js-filter')
+      .find(`input[value="${s.searchTerm}"][name="${s.type}-filter"]`)
+      .addClass('selected');
+    newSearch(s.type, s.searchTerm, p);
+  });
+}
+
+/**
+ * Handles scrolling to the bottom event:
+ *   if current page is not the last page, get quotes on the next page.
+ * 
+ * @param {object} s the search query tracker
+ * @param {object} p the page tracker
+ */
+function scrollToBottomHandler(s, p) {
   $(window).on('scroll', () => {
     let pos = $(window).scrollTop();
     if (pos + $(window).height() === $(document).height()) {
-      if (!pageTrack.lastPage) {
-        pageTrack.currPage++;
-        getQuotes(searchTrack.type, searchTrack.searchTerm, pageTrack);
+      if (!p.lastPage) {
+        setTimeout(() => $('.js-bottom-line').html('Loading...'), 500);
+        setTimeout(() => nextPage(s.type, s.searchTerm, p), 1000);
       }
     }
   });
 }
 
-function initializePage() {
-  getAuthorsAndTags();
-  $('#js-search-term').val("");
-  watchForm();  
+/**
+ * Handles window resizing events: 
+ *   change the placeholder of search input accordingly.
+ */
+function windowResizeHandler() {
+  $(window).resize(function() {
+    if ($(window).width() < 800) {
+      $('.search-term').attr('placeholder', 'Search quotes');
+    }
+    else {
+      $('.search-term').attr('placeholder', 'Search for quotes with keyword, author name or topic');
+    }
+  });
 }
 
-initializePage();
+function initialize() {
+  let authors = [];             // the array of all authors
+  let tags = [];                // the array of all tags
+  let s = { type: "keyword" };  // the search tracker
+  let p = { currPage: 1 };      // the page tracker
+  $('#js-search-term').val("");
+
+  // initialize authors and tags
+  let promise = getAuthorsAndTags(true, true)
+    .then(res => {
+      authors = res.authors;
+      tags = res.tags;
+    });
+
+  // initial search
+  newSearch(s.type, null, p);
+
+  // event handlers
+  promise.then(res => submitHandler(s, p, authors, tags));
+  selectFilterHandler(s, p);
+  selectTagHandler(s, p);
+  scrollToBottomHandler(s, p);
+  selectQuoteHandler();
+  windowResizeHandler();
+}
+
+initialize();

@@ -1,32 +1,7 @@
 'use strict'
 
-const MAX_TAG_COUNT_FOR_RANDOM = 75;
-const apiKey = 'bfa731ef5bbb9cde3dd2ef0c60474809';
-const searchURL = 'https://favqs.com/api/quotes';
-const typesURL = 'https://favqs.com/api/typeahead';
-const imgApiKey = '8114a9a6d86e2223ab0959d33e1c59cc5801706d389b206d48f45be1af724b60';
-const imgSearchURL = 'https://api.unsplash.com/photos/random';
-const options = {
-  headers: new Headers({
-    'Authorization': `Token token="${apiKey}"`
-  })
-};
-const tags = [];
-const qotdTags = [
-  "love",
-  "life",
-  "funny"/*,
-  "faith",
-  "home",
-  "nature",
-  "happiness",
-  "freedom",
-  "future",
-  "strength",
-  "health",
-  "food" */
-]
-const months = [
+const MAX_TAG_COUNT = 75;
+const MONTHS = [
   ["Jan", "January"],
   ["Feb", "February"],
   ["Mar", "March"],
@@ -40,206 +15,156 @@ const months = [
   ["Nov", "November"],
   ["Dec", "December"]
 ];
-const d = new Date();
-var seed;
+const POPULAR_TAGS = [
+  "love",
+  "life",
+  "funny"/*,
+  "faith",
+  "home",
+  "nature",
+  "happiness",
+  "freedom",
+  "future",
+  "strength",
+  "health",
+  "food" */
+]
 
-function getTags() {
-  const url = typesURL;
-  return fetch(url, options)
-    .then(response => {
-      if (response.ok) {
-        return response.json();
-      }
-      throw new Error(response.statusText);
-    })
-    .then(responseJson => {
-      for (let i = 0; i < responseJson.tags.length; i++) {
-        tags[tags.length] = {
-          name: responseJson.tags[i].name,
-          count: responseJson.tags[i].count
-        };
-      }
-    })
-    .catch();
-}
-
-async function searchQuotes(month, day, year) {
+/**
+ * Search for pseudorandom quotes using the input date as the random seed.
+ * 
+ * @param {number} month the month of search
+ * @param {number} day the day of search
+ * @param {number} year the year of search
+ * @param {array} tags the array of tags to search from
+ */
+function searchQuotes(month, day, year, tags) {
+  $('.js-qotd-date').html(`- Quote of ${MONTHS[month][1]} ${day}, ${year} -`);
+  // calculate random seed
   $('.js-results, .js-results-main').empty();
   month = month < 10 ? "0" + month : month;
   day = day < 10 ? "0" + day : day;
-  seed = year.toString().concat(month, day);
-  console.log(seed);
-  const tagIdx = Math.floor(random() * MAX_TAG_COUNT_FOR_RANDOM);
-  $('.js-qotd-date').html(`- Quote of ${months[month][1]} ${day}, ${year} -`);
-  await searchQuoteByTag(tags[tagIdx].name, true);
-  getRandomImg();
-  qotdTags.forEach((ele, idx, arr) => {
-    searchQuoteByTag(ele, false);
+  const seed = year.toString().concat(month, day);
+
+  // get quote of the day
+  const tagIdx = randomIdx(tags.length, seed);
+  const pageCount = tags[tagIdx].count / 25;
+  const resQuote = getQuotes("tag", tags[tagIdx].name, randomIdx(pageCount, seed));
+  const resImage = getRandomImg();
+  Promise.all([resQuote, resImage])
+    .then(res => {
+      const idx = randomIdx(res[0].quotes.length, seed);
+      addQuoteOfTheDay(res[0], idx);
+      addQuoteImage(res[1]);
+      $('.js-qotd').attr('data-url', quoteUrl(res[0].quotes[idx].id, res[1].id));
+    });
+
+  // get quotes of popular tags of the day
+  POPULAR_TAGS.forEach((ele, idx) => {
+    getQuotes("tag", ele, randomIdx(idx, seed))
+      .then(res => addQuote(res, ele, randomIdx(res.quotes.length, seed)));
   });
 }
 
-function searchQuoteByTag(tag, isMain) {
-  const pageCount = tags[tags.findIndex(matchedTagName, tag)].count / 25;
-  const pageNumber = Math.floor(random() * pageCount);
-  return getRandomQuoteByTag(tag, pageNumber, isMain);
+/**
+ * Returns a pseudorandom integer between 0 to range based on the seed.
+ * @param {number} range the range
+ * @param {number} seed the random seed
+ * @returns a pseudorandom integer between 0 to range
+ */
+function randomIdx(range, seed) {
+  return Math.floor(random(seed) * range);
 }
 
-function matchedTagName(tag) {
-  return tag.name == this;
-}
-
-function getRandomQuoteByTag(tag, pageNumber, isMain) {
-  const params = {
-    filter: tag,
-    type: 'tag',
-    page: pageNumber
-  };
-  const url = searchURL + '?' + formatQueryParams(params);
-  return fetch(url, options)
-    .then(response => {
-      if (response.ok) {
-        return {
-          responseJson: response.json(),
-          tag: tag
-        }
-      }
-      throw new Error(response.statusText);
-    })
-    .then((res) => {
-      if (isMain) {
-        displayQuote(res)
-      }
-      else {
-        displayResults(res)
-      }
-    })
-    .catch();
-}
-
-function formatQueryParams(params) {
-  const queryItems = Object.keys(params)
-    .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`);
-    return queryItems.join('&');
-}
-
-function displayResults(res) {
-  res.responseJson.then(responseJson => {
-    const qIdx = Math.floor(random() * responseJson.quotes.length);
-    $('.js-results').append(
-      `<div class="js-result-box result-box col">
-      <div class="js-result-item result-item col" data-url="${quoteEditorUrl(responseJson.quotes[qIdx].id)}">
-      <p class="result-body">"${responseJson.quotes[qIdx].body}"</p>
-      <p class="result-author">${responseJson.quotes[qIdx].author}</p></div>
-      <p class="result-tag">${res.tag}</p><div>`
-    );
-  });
-}
-
-function quoteEditorUrl(quoteID) {
-  const currURL = window.location.href;
-  return `${currURL.slice(0, currURL.lastIndexOf("/"))}/quote-editor.html?quoteID=${quoteID}`;
-}
-
-function quoteEditorUrlWithImgID(imgID) {
-  const currURL = window.location.href;
-  return `${currURL.slice(0, currURL.lastIndexOf("/"))}/quote-editor.html?imageID=${imgID}`;
-}
-
-function getRandomImg() {
-  const params = {
-    orientation: "landscape"
-  };
-  const options = {
-    headers: new Headers({
-      'Authorization': `Client-ID ${imgApiKey}`
-    })
-  };
-  const url = imgSearchURL + "?" + formatQueryParams(params);
-  fetch(url, options)
-  .then(response => {
-    if (response.ok) {
-      return response.json();
-    }
-    throw new Error(response.statusText);
-  })
-  .then(responseJson => displayImg(responseJson))
-  .catch();
-}
-
-function displayQuote(res) {
-  res.responseJson.then(responseJson => {
-    const qIdx = Math.floor(random() * responseJson.quotes.length);
-    if ($('.js-qotd').attr('data-url')) {
-      $('.js-qotd').attr('data-url', `${$('.js-qotd').attr('data-url')}&quoteID=${responseJson.quotes[qIdx].id}`);
-    }
-    else {
-      $('.js-qotd').attr('data-url', `${quoteEditorUrl(responseJson.quotes[qIdx].id)}`);
-    }
-    $('.js-qotd-body').html(`"${responseJson.quotes[qIdx].body}"`);
-    $('.js-qotd-author').html(`- ${responseJson.quotes[qIdx].author}`);
-  });
-}
-
-function displayImg(responseJson) {
-  console.log(responseJson.urls.regular);
-  if ($('.js-qotd').attr('data-url')) {
-    $('.js-qotd').attr('data-url', `${$('.js-qotd').attr('data-url')}&imageID=${responseJson.id}`);
-  }
-  else {
-    $('.js-qotd').attr('data-url', `${quoteEditorUrlWithImgID(responseJson.id)}`);
-  }
-$('.js-qotd').css('background-image', `url(${responseJson.urls.regular})`);
-$('.js-qotd').css('--ratio', responseJson.height / responseJson.width);
-$('.js-qotd').css('height', `calc(${$('.js-qotd').css('width')} * ${responseJson.height} / ${responseJson.width})`);  
-}
-
-async function initialize() {
-  for (let i = 0; i < 12; i++) {
-    $('#js-month').append(`<option value="${i}">${months[i][0]}</option>`);
-  }
-  for (let i = 1; i <= 31; i++) {
-    $('#js-day').append(`<option value="${i}">${i}</option>`);
-  }
-  for (let i = d.getFullYear(); i >= d.getFullYear() - 120; i--) {
-    $('#js-year').append(`<option value="${i}">${i}</option>`);
-  }
-  $('#js-month').find(`option[value="${d.getMonth()}"]`).attr('selected', 'selected');
-  $('#js-day').find(`option[value="${d.getDate()}"]`).attr('selected', 'selected');
-  $('#js-year').find(`option[value="${d.getFullYear()}"]`).attr('selected', 'selected');
-  await getTags();
-  searchQuotes(d.getMonth(), d.getDate(), d.getFullYear());
-}
-
-function watchForm() {
-  // handles selection changes
+/**
+ * Handles selection change events.
+ */
+function changeSelectionHandler() {
   $('#js-month, #js-day, #js-year').change(function(event) {
     $(this).find('option').removeAttr('selected');
     $(this).find(`option[value="${this.value}"]`).attr('selected', 'selected');
   });
+}
 
-  // handles search with submit button
+/**
+ * Handles search submittion events.
+ */
+function submitHandler() {
   $('.js-form').submit(event => {
     event.preventDefault();
-    searchQuotes($('#js-month').find('option[selected="selected"]').val(), 
-    $('#js-day').find('option[selected="selected"]').val(), 
-    $('#js-year').find('option[selected="selected"]').val());
-  });
-
-  $('.js-results').on('click', '.js-result-item, .js-result-item-main', function(event) {
-    window.location = $(this).attr('data-url');
-  });
-  $('.js-editor').on('click', function(event) {
-    window.location = $(this).attr('data-url');
-  });
-  $(window).resize(function() {
-    $('.js-qotd').css('height', parseFloat($('.js-qotd').css('width')) * parseFloat($('.js-qotd').css('--ratio')));  
+    searchQuotes(
+      $('#js-month').find('option[selected="selected"]').val(), 
+      $('#js-day').find('option[selected="selected"]').val(), 
+      $('#js-year').find('option[selected="selected"]').val()
+    );
   });
 }
 
-function random() {
+/**
+ * Handles clicking on quote of the day events.
+ */
+function selectQotdHandler() {
+  $('.js-qotd').on('click', function(event) {
+    window.location = $(this).attr('data-url');
+  });
+}
+
+/**
+ * Handles window resizing events.
+ */
+function windowResizeHandler() {
+  $(window).resize(() => {
+    $('.js-qotd').css(
+      'height', 
+      parseFloat($('.js-qotd').css('width')) 
+        * parseFloat($('.js-qotd').css('--ratio'))
+    );  
+  });
+}
+
+/**
+ * Returns a pseudorandom number between 0 to 1 based on the seed.
+ * @param {number} seed the random seed
+ * @return {number} a pseudorandom integer number between 0 to 1
+ */
+function random(seed) {
     let x = Math.sin(seed) * 10000;
     return x - Math.floor(x);
 }
 
-$(initialize);
-$(watchForm);
+/**
+ * Initializes the page with event handlers and performs the initial search.
+ */
+function initialize() {
+  const today = new Date();
+  const m = today.getMonth();
+  const d = today.getDate();
+  const y = today.getFullYear();
+  let tags = [];
+
+  // initialize popular tags
+  getAuthorsAndTags(false, true, MAX_TAG_COUNT)
+    .then(res => tags = res.tags)
+    // initial search
+    .then(() => searchQuotes(m, d, y, tags));
+
+  // set default date to current system date
+  $('#js-year').append(`<option value="${y}">${y}</option>`);
+  $('#js-month').find(`option[value="${m}"]`).attr('selected', 'selected');
+  $('#js-day').find(`option[value="${d}"]`).attr('selected', 'selected');
+  $('#js-year').find(`option[value="${y}"]`).attr('selected', 'selected');
+
+  // fill in year options
+  for (let i = y - 1; i >= y - 120; i--) {
+    $('#js-year').append(`<option value="${i}">${i}</option>`);
+  }
+
+  // event handlers
+  changeSelectionHandler();
+  submitHandler();
+  selectQotdHandler();
+  selectQuoteHandler();
+  windowResizeHandler()
+}
+
+initialize();
