@@ -107,6 +107,7 @@ function newSearch(type, searchTerm, p) {
     .then(res => {
       $('.js-results, .js-bottom-line, .js-err-msg').empty();
       if (res.quotes[0].id == 0) {
+        p.lastPage = true;
         return false;
       }
       displayResults(res, type, searchTerm, p);
@@ -165,10 +166,11 @@ function displayResults(res, type, searchTerm, p) {
 function submitHandler(s, p, authors, tags) {
   $('.js-search-btn').click(event => {
     event.preventDefault();
+    $('.js-filter').empty();
     s.type = "keyword";
     s.searchTerm = $('#js-search-term').val().toLowerCase();
     if (!s.searchTerm) {
-      newSearch(s,type, s.searchTerm, p);
+      newSearch(s.type, s.searchTerm, p);
     }
     else {
       searchWithSearchTerm(s, p, authors, tags);
@@ -197,6 +199,7 @@ function selectFilterHandler(s, p) {
           $('.js-err-msg').append('No matched result.');
         }
       });
+    $('footer').css('position', 'absolute');
   });  
 }
 
@@ -209,9 +212,15 @@ function selectFilterHandler(s, p) {
  */ 
 function selectTagHandler(s, p) {
   $('.js-results').on('click', '.js-result-tag', function(event) {
-    s.type = "tag";
     s.searchTerm = $(this).html();
-    displayFilter(s.searchTerm, null, s.searchTerm);
+    if (s.searchTerm == "general") {
+      s.type = "keyword";
+      displayFilter(s.searchTerm, null, null);
+    }
+    else {
+      s.type = "tag";
+      displayFilter(s.searchTerm, null, s.searchTerm);
+    }
     $('.js-filter')
       .find(`input[value="${s.searchTerm}"][name="${s.type}-filter"]`)
       .addClass('selected');
@@ -242,7 +251,7 @@ function scrollToBottomHandler(s, p) {
  * Handles window resizing events: 
  *   change the placeholder of search input accordingly.
  */
-function windowResizeHandler() {
+function windowResizeHandler2() {
   $(window).resize(function() {
     if ($(window).width() < 800) {
       $('.search-term').attr('placeholder', 'Search quotes');
@@ -250,9 +259,13 @@ function windowResizeHandler() {
     else {
       $('.search-term').attr('placeholder', 'Search for quotes with keyword, author name or topic');
     }
+    console.log($('nav').css('height'))
   });
 }
 
+/**
+ * Initializes the page with event handlers and performs the initial search.
+ */
 function initialize() {
   let authors = [];             // the array of all authors
   let tags = [];                // the array of all tags
@@ -271,12 +284,12 @@ function initialize() {
   newSearch(s.type, null, p);
 
   // event handlers
-  promise.then(res => submitHandler(s, p, authors, tags));
+  promise.then(() => submitHandler(s, p, authors, tags));
   selectFilterHandler(s, p);
   selectTagHandler(s, p);
   scrollToBottomHandler(s, p);
   selectQuoteHandler();
-  windowResizeHandler();
+  windowResizeHandler2();
 }
 
 initialize();

@@ -50,13 +50,15 @@ function searchQuotes(month, day, year, tags) {
   const tagIdx = randomIdx(tags.length, seed);
   const pageCount = tags[tagIdx].count / 25;
   const resQuote = getQuotes("tag", tags[tagIdx].name, randomIdx(pageCount, seed));
-  const resImage = getRandomImg();
+  console.log(tags[tagIdx].name);
+  const resImage = getRandomImg(tags[tagIdx].name);
   Promise.all([resQuote, resImage])
     .then(res => {
       const idx = randomIdx(res[0].quotes.length, seed);
       addQuoteOfTheDay(res[0], idx);
-      addQuoteImage(res[1]);
-      $('.js-qotd').attr('data-url', quoteUrl(res[0].quotes[idx].id, res[1].id));
+      addImage(res[1]);
+      $('.js-qotd-img').css('display', 'block');
+      $('.js-qotd').attr('data-url', quoteUrl(res[0].quotes[idx].id, tags[tagIdx].name, res[1].id));
     });
 
   // get quotes of popular tags of the day
@@ -68,9 +70,10 @@ function searchQuotes(month, day, year, tags) {
 
 /**
  * Returns a pseudorandom integer between 0 to range based on the seed.
+ * 
  * @param {number} range the range
  * @param {number} seed the random seed
- * @returns a pseudorandom integer between 0 to range
+ * @returns {number} a pseudorandom integer between 0 to range
  */
 function randomIdx(range, seed) {
   return Math.floor(random(seed) * range);
@@ -87,49 +90,40 @@ function changeSelectionHandler() {
 }
 
 /**
- * Handles search submittion events.
+ * Returns a pseudorandom number between 0 to 1 based on the seed.
+ * 
+ * @param {number} seed the random seed
+ * @returns {number} a pseudorandom integer number between 0 to 1
  */
-function submitHandler() {
+function random(seed) {
+  let x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
+
+/**
+ * Handles search submittion events:
+ *   search for quotes of the selected date.
+ */
+function submitHandler(tags) {
   $('.js-form').submit(event => {
     event.preventDefault();
     searchQuotes(
       $('#js-month').find('option[selected="selected"]').val(), 
       $('#js-day').find('option[selected="selected"]').val(), 
-      $('#js-year').find('option[selected="selected"]').val()
+      $('#js-year').find('option[selected="selected"]').val(),
+      tags
     );
   });
 }
 
 /**
- * Handles clicking on quote of the day events.
+ * Handles clicking on quote of the day events:
+ *   open the quote-img page in a new tab with the selected quote and image.
  */
 function selectQotdHandler() {
   $('.js-qotd').on('click', function(event) {
     window.location = $(this).attr('data-url');
   });
-}
-
-/**
- * Handles window resizing events.
- */
-function windowResizeHandler() {
-  $(window).resize(() => {
-    $('.js-qotd').css(
-      'height', 
-      parseFloat($('.js-qotd').css('width')) 
-        * parseFloat($('.js-qotd').css('--ratio'))
-    );  
-  });
-}
-
-/**
- * Returns a pseudorandom number between 0 to 1 based on the seed.
- * @param {number} seed the random seed
- * @return {number} a pseudorandom integer number between 0 to 1
- */
-function random(seed) {
-    let x = Math.sin(seed) * 10000;
-    return x - Math.floor(x);
 }
 
 /**
@@ -143,10 +137,11 @@ function initialize() {
   let tags = [];
 
   // initialize popular tags
-  getAuthorsAndTags(false, true, MAX_TAG_COUNT)
-    .then(res => tags = res.tags)
-    // initial search
-    .then(() => searchQuotes(m, d, y, tags));
+  let promise = getAuthorsAndTags(false, true, MAX_TAG_COUNT)
+    .then(res => tags = res.tags);
+  
+  // initial search
+  promise.then(() => searchQuotes(m, d, y, tags));
 
   // set default date to current system date
   $('#js-year').append(`<option value="${y}">${y}</option>`);
@@ -160,8 +155,8 @@ function initialize() {
   }
 
   // event handlers
+  promise.then(() => submitHandler(tags));
   changeSelectionHandler();
-  submitHandler();
   selectQotdHandler();
   selectQuoteHandler();
   windowResizeHandler()

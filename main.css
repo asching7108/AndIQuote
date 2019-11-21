@@ -40,8 +40,14 @@ body {
 }
 
 main {
-  margin: 0 auto 50px;
+  border: 1px solid pink;
+  margin: 0 auto -100px;
   width: 90%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-bottom: 100px;
+  min-height: calc(100vh - 103px);
 }
 
 a {
@@ -98,6 +104,53 @@ nav {
   transition: color 0.5s;
 }
 
+.btn {
+  font-size: 1em;
+  background-color: #D70015;
+  border: 1px solid #D70015;
+  color: #FFFFFF;
+  -webkit-transition: color 0.5s;
+  -moz-transition: color 0.5s;
+  -o-transition: color 0.5s;
+  transition: color 0.5s;
+}
+
+.qotd {
+  width: 90%;
+  max-width: 800px;
+  margin: 25px auto 0;
+  -webkit-background-size: contain;
+  -moz-background-size: contain;
+  -o-background-size: contain;
+  background-size: contain;
+}
+
+.qotd-img {
+  display: none;
+  position: absolute;
+  z-index: -1;
+}
+
+.qotd-body,
+.qotd-author {
+  width: 90%;
+  margin: 10px auto;
+  font-size: 0.9em;
+  line-height: 1.1;
+  text-shadow: 2px 2px 2px #8E8E93;
+}
+
+.img-attr {
+  color: #D1D1D6;
+  font-size: 0.8em;
+  margin: 5px auto 20px;
+}
+
+.img-attr a {
+  text-decoration: underline;
+  color: #D1D1D6;
+}
+
 .results,
 .results-main {
   width: 100%;
@@ -151,15 +204,23 @@ nav {
   text-transform: uppercase;
 }
 
-link:focus,
+footer {
+  width: 100%;
+  height: 100px;
+  border: 1px solid blue;
+  text-align: center;
+}
+
+button:focus,
 input:focus,
-button:focus {
+select:focus {
   outline: 0;
 }
 
 link:hover,
 .link:hover,
-input[type=button]:hover {
+input[type=button]:hover,
+select:hover {
   cursor: pointer;
 }
 
@@ -172,21 +233,38 @@ input[type=button]:hover {
   color: #96FFD1;
 }
 
+.btn:hover {
+  color: #D1D1D6;
+}
+
 .result-box:hover {
   transform: translateY(-3px);
 }
 
 @media screen and (min-width: 480px) {
+  .qotd-body,
+  .qotd-author {
+    font-size: 1em;
+    line-height: 1.3;
+  }
   .result-box {
     width: 42%;
   }
 }
 
 @media screen and (min-width: 640px) {
-
+  .qotd-body,
+  .qotd-author {
+    font-size: 1.3em;
+    line-height: 1.5;
+    margin: 15px auto;
+  }
 }
 
 @media screen and (min-width: 800px) {
+  main {
+    min-height: calc(100vh - 50px);
+  }
   nav {
     height: 50px;
     flex-direction: row;
@@ -200,6 +278,12 @@ input[type=button]:hover {
   }
   .nav-item a i {
     display: none;
+  }
+  .qotd-body,
+  .qotd-author {
+    font-size: 1.5em;
+    line-height: 1.5;
+    margin: 20px auto;
   }
 }
 

@@ -1,55 +1,89 @@
-
-
-.editor, .quote-img {
-  margin: 10px auto;
-  border: 1px solid green;
-  width: 800px;
-  height: 500px;
-}
-
-.button-container {
-  margin-top: 10px;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-}
-
-.link {
-  width: 10em;
-  height: 2.5em;
-  background-color: grey;
-  border: 1px solid black;
-  border-radius: 5px;
-  text-align: center;
-  margin: 5px;
-}
-
-a {
-  text-decoration: none;
-}
-.link a {
-  color: white;
-}
-
-link:hover {
-  cursor: pointer;
-}
-
-#qotdCanvas {
-  max-width: 800px;
-  margin: 25px auto;
-  -webkit-background-size: contain;
-  -moz-background-size: contain;
-  -o-background-size: contain;
-  background-size: contain;
-}
-
-.qotd-img {
-  display: block;
-  position: absolute;
-  z-index: -1;
-}
-
-#qotdCanvas {
+canvas {
   display: none;
+}
+
+.search-form {
+  width: 120px;
+  margin: 20px auto;
+  justify-content: space-between;
+  text-align: left;
+}
+
+.search-prompt {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 0.8em;
+  color: #96FFD1;
+}
+
+.search-term {
+  height: 36px;
+  width: 84px;
+  padding-left: 10px;
+  color: #48484A;
+  font-size: 0.8em;
+  border: 1px solid #D70015;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.search-btn {
+  width: 36px;
+  font-size: 0.8em;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.save-btn {
+  height: 36px;
+  width: 112px;
+  font-size: 0.9em;
+  border-radius: 4px;
+  margin: 20px auto;
+}
+
+@media screen and (min-width: 480px) {
+  .search-form {
+    width: 160px;
+  }
+  .search-term {
+    width: 124px;
+  }
+}
+
+@media screen and (min-width: 640px) {
+  .search-form {
+    width: 200px;
+    margin: 20px auto;
+  }
+  .search-prompt {
+    font-size: 1em;
+  }
+  .search-term {
+    height: 46px;
+    width: 154px;
+    font-size: 1em;
+  }
+  .search-btn {
+    width: 46px;
+    font-size: 1em;
+  }
+  .save-btn {
+    width: 144px;
+    height: 46px;
+    font-size: 1em;
+  }
+}
+
+@media screen and (min-width: 800px) {
+  .search-form {
+    margin-top: 40px;
+  }
+  .search-form {
+    width: 300px;
+  }
+  .search-term {
+    width: 254px;
+  } 
 }
