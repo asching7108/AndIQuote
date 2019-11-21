@@ -1,210 +1,120 @@
-* {
-  box-sizing: border-box;
+.heading-quote {
+  margin: 15px auto;
 }
 
-body {
-  font-family: "Helvetica Neue", "Helvetica", "Roboto", sans-serif;
-  font-weight: normal;
-  letter-spacing: .024em;
-  -webkit-font-smoothing: antialiased;
-  font-size: 14px;
-  line-height: 1.5;
-  text-align: center;
-  margin: 0;
-}
-
-.col {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.row {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-}
-
-.container {
-  width: 80vw;
-  max-width: 1000px;
-  height: 100vh;
-  margin: 0 auto;
-}
-
-h1 {
-  margin-top: -5vh;
-}
-
-h2:before {
-  content:"";
-  display: inline-block;
-  width: 12px;
-  height: 1px;
-  position: relative;
-  top: -28%;
-  right: 10px;
-  background-color: black;
-}
-
-.button-container {
-  margin-top: 6%;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
-}
-
-.link {
-  width: 10em;
-  height: 2.5em;
-  background-color: grey;
-  border: 1px solid black;
-  border-radius: 5px;
-}
-
-a {
-  text-decoration: none;
-}
-.link a {
-  color: white;
-}
-
-link:hover,
-.editor:hover,
-input[type=button]:hover,
-.btn:hover,
-.result-item-main:hover,
-.result-item:hover {
-  cursor: pointer;
-}
-
-/* ----------------------- find quotes ------------------------*/
-nav {
-  width: 100%;
-  height: 50px;
-  background-color: grey;
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  align-items: center;
-  padding-right: 20px;
-}
-
-.nav-home {
-  position: absolute;
-  left: 20px;
-}
-
-.nav-item a {
-  margin-left: 10px;
-  color: white;
+.heading {
+  font-size: 1.2em;
+  margin: 10px auto 30px;
 }
 
 .search-form {
-  width: 64%;
-  margin: 10px auto;
+  width: 70%;
+  max-width: 640px;
+  margin: 0 auto;
+  justify-content: space-between;
   text-align: left;
 }
 
-.type-select-box {
-  display: none;
-  width: 7.5em;
-  height: 3em;
-  border: 1px solid grey;
-  background-color: lemonchiffon;
+.search-term {
+  height: 36px;
+  width: calc(100% - 36px);
+  padding-left: 10px;
+  font-size: 0.8em;
+  color: #48484A;
+  border: 1px solid #D70015;
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
 }
 
-.type-select {
-  width: 100%;
-  heighT: 100%;
-  position: relative;
-  top: -1.5em;
-  border: 0;
-  background: transparent;
-  padding-left: 10px;
-  -webkit-appearance: none;
-  font-size: 14px;
-}
-
-.fa-chevron-down:before {
-  content: "\f078";
-  position: relative;
-  top: 0.8em;
-  left: 5.75em;
-  font-family: FontAwesome;
-  font-style: normal;
-  font-weight: normal;
-}
-
-.search-term,
-.date-inputs {
-  display: block;
-  height: 3em;
-  width: calc(100% - 3em);
-  padding-left: 10px;
-  font-size: 14px;
-  border: 1px solid grey;
-}
-
-.date-inputs {
-  display: flex;
-  justify-content: space-evenly;
-  align-items: center;
-}
-
-.submit-btn {
-  width: 3em;
-  height: 3em;
-  font-size: 14px;
-  border: 1px solid grey;
+.search-btn {
+  width: 36px;
   border-top-right-radius: 4px;
   border-bottom-right-radius: 4px;
-}
-
-.fas:before {
-  font-family: FontAwesome;
-  font-style: normal;
-  font-weight: normal;
 }
 
 .fa-search:before {
   content: "\f002";
   display: inline-block;
+  color: #FFFFFF;
+  -webkit-transition: color 0.5s;
+  -moz-transition: color 0.5s;
+  -o-transition: color 0.5s;
+  transition: color 0.5s;
 }
 
-/* ----------------------- quote of the day ------------------------*/
-.search-date {
-  text-align: right;
-}
-
-.editor {
+.filter {
+  /*border: 1px solid green;*/
+  width: 90%;
+  max-width: 1000px;
   margin: 10px auto;
-  width: 800px;
+  justify-content: flex-start;
 }
 
-.editor img {
-  width: 100%;
+.js-filter label,
+.js-filter input {
+  margin: 3px;
 }
 
-.quote,
-.author {
-  color: white;
-  text-align: center;
-  -webkit-text-stroke-width: 1px; 
-  -webkit-text-stroke-color: black;
+.js-filter input {
+  font-size: 0.9em;
+  border-radius: 5px;
+  border: none;
 }
 
-.author:before {
-  content:"";
-  display: inline-block;
-  width: 12px;
-  height: 1px;
-  position: relative;
-  top: -28%;
-  right: 10px;
-  border: 1px solid black;
-  background-color: white;
+.js-filter .selected {
+  background-color: #D70015;
+  color: #FFFFFF;
+  font-weight: bold;
+}
+
+.js-filter input:hover {
+  background-color: #D70015;
+  color: #FFFFFF;
+  font-weight: bold;
+}
+
+.search-btn:hover .fa-search:before {
+  color: #D1D1D6;
+}
+
+@media screen and (min-width: 480px) {
+  .heading {
+    font-size: 1.8em;
+  }
+}
+
+@media screen and (min-width: 640px) {
+  .heading {
+    font-size: 2.4em;
+  }
+  .search-form {
+    margin: 20px auto;
+  }
+  .search-term {
+    height: 46px;
+    width: calc(100% - 46px);
+    font-size: 1em;
+  }
+  .search-btn {
+    width: 46px;
+    font-size: 1.2em;
+  }
+}
+
+@media screen and (min-width: 800px) {
+  .heading-quote {
+    margin: 15px auto;
+    font-size: 1.2em;
+  }
+  
+  .heading {
+    font-size: 50px;
+    margin: 10px auto 30px;
+  }
+}
+
+@media screen and (min-width: 900px) {
+  .filter {
+    width: 82%;
+  }
 }

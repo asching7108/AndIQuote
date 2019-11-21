@@ -1,0 +1,93 @@
+.search-form {
+  width: 70%;
+  max-width: 640px;
+  margin: 20px auto 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.date-selector-box {
+  background-color: #FFFFFF;
+  border: 1px solid #D70015;
+  border-radius: 4px;
+  text-align: right;
+}
+
+.date-selector-box,
+.search-btn {
+  width: 120px;
+  height: 32px;
+  margin: 5px;
+}
+
+.date-selector {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -o-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: none;
+  padding-left: 16px;
+  font-size: 0.8em;
+  color: #48484A;
+  position: relative;
+  z-index: 99;
+}
+
+.fa-chevron-down:before {
+  content: "\f078";
+  font-size: 0.8em;
+  position: relative;
+  top: -28px;
+  right: 16px;
+  background: none;
+  color: #D70015;
+}
+
+.search-btn {
+  border-radius: 4px;
+}
+
+.qotd-title {
+  font-size: 1em;
+  color: #96FFD1;
+  margin: 15px;
+}
+
+@media screen and (min-width: 640px) {
+  .search-form {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  .date-selector-box,
+  .search-btn {
+    width: 22%;
+    height: 40px;
+  }
+  .fa-chevron-down:before {
+    top: -32px;
+  }
+}
+@media screen and (min-width: 800px) {
+  .search-form {
+    margin-top: 30px;
+  }
+  .date-selector-box,
+  .search-btn {
+    width: 22%;
+    height: 46px;
+  }
+  .date-selector {
+    font-size: 0.9em;
+  }
+  .fa-chevron-down:before {
+    font-size: 0.9em;
+    top: -36px;
+  } 
+  .qotd-title {
+    font-size: 1.2em;
+  }
+}
