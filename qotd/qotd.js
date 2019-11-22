@@ -18,7 +18,7 @@ const MONTHS = [
 const POPULAR_TAGS = [
   "love",
   "life",
-  "funny"/*,
+  "funny",
   "faith",
   "home",
   "nature",
@@ -27,7 +27,7 @@ const POPULAR_TAGS = [
   "future",
   "strength",
   "health",
-  "food" */
+  "food" 
 ]
 
 /**
@@ -41,7 +41,7 @@ const POPULAR_TAGS = [
 function searchQuotes(month, day, year, tags) {
   $('.js-qotd-date').html(`- Quote of ${MONTHS[month][1]} ${day}, ${year} -`);
   // calculate random seed
-  $('.js-results, .js-results-main').empty();
+  $('.js-results, .js-results-main, .js-error-msg').empty();
   month = month < 10 ? "0" + month : month;
   day = day < 10 ? "0" + day : day;
   const seed = year.toString().concat(month, day);
@@ -56,9 +56,13 @@ function searchQuotes(month, day, year, tags) {
     .then(res => {
       const idx = randomIdx(res[0].quotes.length, seed);
       addQuoteOfTheDay(res[0], idx);
-      addImage(res[1]);
+      if (res[1]) {
+        addImage(res[1]);
+      };
       $('.js-qotd-img').css('display', 'block');
-      $('.js-qotd').attr('data-url', quoteUrl(res[0].quotes[idx].id, tags[tagIdx].name, res[1].id));
+      if (res[1]) {
+        $('.js-qotd').attr('data-url', quoteUrl(res[0].quotes[idx].id, tags[tagIdx].name, res[1].id));
+      }
     });
 
   // get quotes of popular tags of the day
@@ -122,7 +126,7 @@ function submitHandler(tags) {
  */
 function selectQotdHandler() {
   $('.js-qotd').on('click', function(event) {
-    window.location = $(this).attr('data-url');
+    window.open($(this).attr('data-url'), '_blank');
   });
 }
 
@@ -137,8 +141,10 @@ function initialize() {
   let tags = [];
 
   // initialize popular tags
-  let promise = getAuthorsAndTags(false, true, MAX_TAG_COUNT)
-    .then(res => tags = res.tags);
+  let promise = getAuthorsAndTags();
+  promise.then(res => {
+    tags = parseAuthorsAndTags(res, "tag", MAX_TAG_COUNT);
+  });
   
   // initial search
   promise.then(() => searchQuotes(m, d, y, tags));

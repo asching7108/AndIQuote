@@ -81,7 +81,7 @@ function searchWithSearchTerm(s, p, authors, tags) {
             newSearch(s.type, s.searchTerm, p);
           }
           else {
-            $('.js-err-msg').append('No matched result.');
+            $('.js-error-msg').html('No matched result.');
           }
         }
       });
@@ -105,7 +105,7 @@ function newSearch(type, searchTerm, p) {
   p.currPage = 1;
   return getQuotes(type, searchTerm, 1)
     .then(res => {
-      $('.js-results, .js-bottom-line, .js-err-msg').empty();
+      $('.js-results, .js-bottom-line, .js-error-msg').empty();
       if (res.quotes[0].id == 0) {
         p.lastPage = true;
         return false;
@@ -196,7 +196,7 @@ function selectFilterHandler(s, p) {
     newSearch(s.type, s.searchTerm, p)
       .then(res => {
         if (!res) {
-          $('.js-err-msg').append('No matched result.');
+          $('.js-error-msg').html('No matched result.');
         }
       });
     $('footer').css('position', 'absolute');
@@ -259,7 +259,6 @@ function windowResizeHandler2() {
     else {
       $('.search-term').attr('placeholder', 'Search for quotes with keyword, author name or topic');
     }
-    console.log($('nav').css('height'))
   });
 }
 
@@ -274,11 +273,11 @@ function initialize() {
   $('#js-search-term').val("");
 
   // initialize authors and tags
-  let promise = getAuthorsAndTags(true, true)
-    .then(res => {
-      authors = res.authors;
-      tags = res.tags;
-    });
+  let promise = getAuthorsAndTags();
+  promise.then(res => {
+    authors = parseAuthorsAndTags(res, "author");
+    tags = parseAuthorsAndTags(res, "tag");
+  });
 
   // initial search
   newSearch(s.type, null, p);
