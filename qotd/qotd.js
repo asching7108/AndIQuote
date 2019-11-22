@@ -50,7 +50,6 @@ function searchQuotes(month, day, year, tags) {
   const tagIdx = randomIdx(tags.length, seed);
   const pageCount = tags[tagIdx].count / 25;
   const resQuote = getQuotes("tag", tags[tagIdx].name, randomIdx(pageCount, seed));
-  console.log(tags[tagIdx].name);
   const resImage = getRandomImg(tags[tagIdx].name);
   Promise.all([resQuote, resImage])
     .then(res => {
