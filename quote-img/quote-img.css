@@ -29,6 +29,7 @@ main {
   color: #48484A;
   font-size: 0.8em;
   border: 1px solid #FFFFFF;
+  border-radius: 0;
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
   line-height: 1;

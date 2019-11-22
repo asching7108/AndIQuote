@@ -26,6 +26,7 @@
   font-size: 0.8em;
   color: #48484A;
   border: 1px solid #FFFFFF;
+  border-radius: 0;
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
 }
