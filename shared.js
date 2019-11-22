@@ -37,20 +37,19 @@ function getAuthorsAndTags() {
 function parseAuthorsAndTags(responseJson, type, tagMax) {
   const res = [];
   if (type == "author") {
-    for (let i = 0; i < responseJson.authors.length; i++) {
-      res[res.length] = {
-        name: responseJson.authors[i].name,
-        name_lc: responseJson.authors[i].name.toLowerCase()
-      };
-    }
-  }
-  else {
+    responseJson.authors.forEach(ele => {
+      res.push({
+        name: ele.name,
+        name_lc: ele.name.toLowerCase()
+      });
+    });
+  }else {
     const max = tagMax ? tagMax : responseJson.tags.length;
     for (let i = 0; i < max; i++) {
-      res[res.length] = {
+      res.push({
         name: responseJson.tags[i].name,
         count: responseJson.tags[i].count
-      };
+      });
     }
   }
   return res;
