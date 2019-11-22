@@ -1,5 +1,26 @@
 'use strict'
 
+/**
+ * Displays the quote and image based on the parameters of the page url.
+ */
+function getQuoteImage() {
+  const params = getParam();
+  $('#js-search-term').val(params.tag);
+  const resQuote = getQuoteByID(params.quoteID);
+  const resImage = params.imageID ? getImageByID(params.imageID) : getRandomImg(params.tag);
+  Promise.all([resQuote, resImage])
+    .then(res => {
+      addQuoteOfTheDay(res[0]);
+      addImage(res[1]);
+      $('.js-qotd-img').css('display', 'block');
+    });
+}
+
+/**
+ * Returns parameters from the page url.
+ * 
+ * @returns {object} an object of the parameters
+ */
 function getParam() {
   const url = window.location.href;
   const param = {};
@@ -18,18 +39,13 @@ function getParam() {
   return param;
 }
 
-function getQuoteImage(params) {
-  const resQuote = getQuoteByID(params.quoteID);
-  const resImage = params.imageID ? getImageByID(params.imageID) : getRandomImg(params.tag);
-  Promise.all([resQuote, resImage])
-    .then(res => {
-      addQuoteOfTheDay(res[0]);
-      addImage(res[1]);
-      $('.js-qotd-img').css('display', 'block');
-    });
-}
-
-function downloadImage() {
+/**
+ * Handles the download events:
+ *   downloads the quote image.
+ */
+function saveHandler() {
+  $('.js-save-btn').click(event => {
+    $("html, body").scrollTop(0);
   html2canvas(document.querySelector('#qotd'), {
     scale: 1.2, 
     allowTaint: true, 
@@ -39,27 +55,28 @@ function downloadImage() {
       document.body.appendChild(canvas);
       let imgData = canvas.toDataURL('image/jpg').replace("image/jpg", "image/octet-stream");
       let imgLink = document.getElementById('downloadLink');
-      console.log(imgLink);
-      imgLink.download = 'AndIQuote1.jpg';
+      imgLink.download = 'my_quote_from_AndIQuote.jpg';
       imgLink.href = imgData;
       imgLink.click();
     });
-}
-
-function saveHandler() {
-  $('.js-save-btn').click(event => {
-    downloadImage();
   });
 }
 
+/**
+ * Handles the search submittion events:
+ *   get a random image of the query and replace the quote image with it.
+ */
 function submitHandler() {
   $('.js-search-btn').click(event => {
     event.preventDefault();
+    $('.js-error-msg').empty();
     const tag = $('#js-search-term').val().toLowerCase();
     getRandomImg(tag)
       .then(res => {
-        addImage(res);
-      });
+        if (res) {
+          addImage(res);
+        }
+      })
   });
 }
 
@@ -68,10 +85,7 @@ function submitHandler() {
  * specified by the parameters.
  */
 function initialize() {
-  const params = getParam();
-  console.log(params);
-  $('#js-search-term').val(params.tag);
-  getQuoteImage(params);
+  getQuoteImage();
 
   // event handlers
   submitHandler();

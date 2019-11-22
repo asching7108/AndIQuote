@@ -6,7 +6,7 @@ body {
   background-color: #1C1C1E;
   background: -webkit-linear-gradient(rgba(28, 28, 30, 0.1), rgba(28, 28, 30, 0.8)), 
     -webkit-linear-gradient(rgba(28, 28, 30, 0.5), rgba(28, 28, 30, 0.3)), 
-    url(bg-reg.jpeg);
+    url(images/bg-reg.jpeg);
   background-position: center center;
   background-attachment: fixed;
   background-repeat: no-repeat;
@@ -40,7 +40,6 @@ body {
 }
 
 main {
-  border: 1px solid pink;
   margin: 0 auto -100px;
   width: 90%;
   display: flex;
@@ -57,6 +56,12 @@ a {
 
 em {
   color: #96FFD1;
+}
+
+.error-msg {
+  font-style: italic;
+  color: #D1D1D6;
+  margin: 0;
 }
 
 .fas:before {
@@ -135,14 +140,14 @@ nav {
 .qotd-author {
   width: 90%;
   margin: 10px auto;
-  font-size: 0.9em;
-  line-height: 1.1;
+  font-size: 0.7em;
+  line-height: 1;
   text-shadow: 2px 2px 2px #8E8E93;
 }
 
 .img-attr {
   color: #D1D1D6;
-  font-size: 0.8em;
+  font-size: 0.6em;
   margin: 5px auto 20px;
 }
 
@@ -207,8 +212,18 @@ nav {
 footer {
   width: 100%;
   height: 100px;
-  border: 1px solid blue;
   text-align: center;
+  color: #D1D1D6;
+}
+
+footer p {
+  font-size: 0.6em;
+  margin: 5px;
+}
+
+footer p a {
+  color: #D1D1D6;
+  text-decoration: underline;
 }
 
 button:focus,
@@ -241,6 +256,14 @@ select:hover {
   transform: translateY(-3px);
 }
 
+@media screen and (min-width: 320px) {
+  .qotd-body,
+  .qotd-author {
+    font-size: 0.9em;
+    line-height: 1.1;
+  }
+}
+
 @media screen and (min-width: 480px) {
   .qotd-body,
   .qotd-author {
@@ -258,6 +281,10 @@ select:hover {
     font-size: 1.3em;
     line-height: 1.5;
     margin: 15px auto;
+  }
+  .img-attr,
+  footer p {
+    font-size: 0.8em;
   }
 }
 

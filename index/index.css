@@ -16,6 +16,10 @@
 }
 
 .search-term {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -o-appearance: none;
+  appearance: none;
   height: 36px;
   width: calc(100% - 36px);
   padding-left: 10px;

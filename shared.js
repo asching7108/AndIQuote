@@ -18,32 +18,12 @@ const OPTIONS_I = {
 const ATTR_URL_I = 'https://unsplash.com/?utm_source=AndIQuote&utm_medium=referral';
 
 /**
- * Calls FavQs API: Typeahead to retrieve all authurs and tags.
+ * Retrieves all authurs and tags.
  * 
- * @param {boolean} author if authors are needed to get
- * @param {boolean} tag if tags are needed to get
- * @param {number} tagMax the max number of tags to get
  * @returns {Promise} Promise object represents the result of the query
  */
-function getAuthorsAndTags(author, tag, tagMax) {
-  return fetch(GET_TYPE_URL, OPTIONS_Q)
-    .then(response => {
-      if (response.ok) {
-        return response.json();
-      }
-      throw new Error(response.statusText);
-    })
-    .then(responseJson => {
-      const res = {};
-      if (author) {
-        res.authors = parseAuthorsAndTags(responseJson, "author", null);
-      }
-      if (tag) {
-        res.tags = parseAuthorsAndTags(responseJson, "tag", tagMax);
-      }
-      return res;
-    })
-    .catch();
+function getAuthorsAndTags() {
+  return makeQuoteRequest(GET_TYPE_URL);
 }
 
 /**
@@ -77,8 +57,8 @@ function parseAuthorsAndTags(responseJson, type, tagMax) {
 }
 
 /**
- * Calls FavQs API: ListQuotes to retrieve quotes matching the query, 
- * and returns a Promise object representing the response in Json.
+ * Retrieves quotes matching the query, and returns a Promise object 
+ * representing the response in Json.
  * 
  * @param {string} type the search type of the query
  * @param {string} searchterm the search term of the query
@@ -94,33 +74,19 @@ async function getQuotes(type, searchTerm, page) {
     params.filter = searchTerm;
   }
   const url = GET_QUOTE_URL + '?' + formatQueryParams(params);
-  return fetch(url, OPTIONS_Q)
-    .then(response => {
-      if (response.ok) {
-        return response.json();
-      }
-      throw new Error(response.statusText);
-    })
-    .catch();
+  return makeQuoteRequest(url);
 }
 
 /**
- * Calls FavQs API: ListQuotes to retrieve quotes of the given quote ID, 
- * and returns a Promise object representing the response in Json.
+ * Retrieves quotes of the given quote ID, and returns a Promise object 
+ * representing the response in Json.
  * 
  * @param {string} quoteID the quote ID
  * @returns {Promise} Promise object of the response in Json
  */
 function getQuoteByID(quoteID) {
   const url = GET_QUOTE_URL + "/" + quoteID;
-  return fetch(url, OPTIONS_Q)
-    .then(response => {
-      if (response.ok) {
-        return response.json();
-      }
-      throw new Error(response.statusText);
-    })
-    .catch();
+  return makeQuoteRequest(url);
 }
 
 /**
@@ -136,8 +102,31 @@ function formatQueryParams(params) {
 }
 
 /**
- * Calls Unsplash API: photos to retrieve a random image, 
- * and returns a Promise object representing the response in Json.
+ * Calls FavQs API to retrieve quote data.
+ * 
+ * @param {string} url the url of the request
+ * @returns {Promise} Promise object of the response in Json
+ */
+function makeQuoteRequest(url) {
+  return fetch(url, OPTIONS_Q)
+    .then(response => {
+      let res = response.json();
+      if (response.ok) {
+        return res;
+      }
+      res
+        .then(res => {
+          throw new Error(res)
+        })
+        .catch(error => {
+          $('.js-error-msg').html(error);
+        });
+    })
+}
+
+/**
+ * Retrieve a random image, and returns a Promise object representing the 
+ * response in Json.
  * 
  * @param {string} tag the tag as the search query
  * @returns {Promise} Promise object of the response in Json
@@ -147,35 +136,43 @@ function getRandomImg(tag) {
     orientation: "landscape",
     query: tag ? tag : "scenary"
   };
-  console.log(params.query);
   const url = GET_IMG_URL + "/random?" + formatQueryParams(params);
-  return fetch(url, OPTIONS_I)
-  .then(response => {
-    if (response.ok) {
-      return response.json();
-    }
-    throw new Error(response.statusText);
-  })
-  .catch();
+  return makeImageRequest(url);
 }
 
 /**
- * Calls Unsplash API: photos to retrieve the image of the given image ID, 
- * and returns a Promise object representing the response in Json.
+ * Retrieves the image of the given image ID, and returns a Promise object 
+ * representing the response in Json.
  * 
  * @param {string} imageID the image ID
  * @returns {Promise} Promise object of the response in Json
  */
 function getImageByID(imageID) {
   const url = GET_IMG_URL + "/" + imageID;
+  return makeImageRequest(url);
+}
+
+/**
+ * Calls Unsplash API to retrieve image data.
+ * 
+ * @param {string} url the url of the request
+ * @returns {Promise} Promise object of the response in Json
+ */
+function makeImageRequest(url) {
   return fetch(url, OPTIONS_I)
   .then(response => {
+    let res = response.json();
     if (response.ok) {
-      return response.json();
+      return res;
     }
-    throw new Error(response.statusText);
+    res
+      .then(res => {
+        throw new Error(res.errors.join(' '));
+      })
+      .catch(error => {
+        $('.js-error-msg').html(error);
+      });
   })
-  .catch();
 }
 
 /**
@@ -226,20 +223,20 @@ function addQuoteOfTheDay(res, i) {
  * @param {object} res the response in JSON
  */
 function addImage(res) {
-  const width = $('.js-qotd').css('width');
+  const width = parseFloat($('.js-qotd').css('width'));
   const ratio = res.height / res.width;
+  const height = Math.floor(width * ratio);
   $('.js-qotd').css('--ratio', ratio);
-  $('.js-qotd').css('height', `calc(${width} * ${ratio})`);
+  $('.js-qotd').css('height', height);
   $('.js-qotd-img').css('width', width);
   $('.js-qotd-img').attr('src', res.urls.regular);
-  console.log(res);
   const splitIdx = ATTR_URL_I.lastIndexOf('/');
   const attr_author_url = ATTR_URL_I.slice(0, splitIdx + 1) 
     + "@" + res.user.username
     + ATTR_URL_I.slice(splitIdx);
-    console.log(attr_author_url);
   $('.js-img-attr')
-    .html(`Photo by <a href="${attr_author_url}">${res.user.name}</a> on <a href="${ATTR_URL_I}">Unsplash</a>`);
+    .html(`Photo by <a href="${attr_author_url}" target="_blank">${res.user.name}</a>
+     on <a href="${ATTR_URL_I}" target="_blank">Unsplash</a>`);
 }
 
 /**
@@ -252,8 +249,8 @@ function addImage(res) {
  */
 function quoteUrl(quoteID, tag, imageID) {
   let prefixURL = window.location.href;
-  prefixURL = prefixURL.slice(0, prefixURL.lastIndexOf("/"));
-  let quoteURL = `${prefixURL}/quote-img.html?quoteID=${quoteID}`;
+  prefixURL = prefixURL.slice(0, prefixURL.lastIndexOf("AndIQuote/") + 10);
+  let quoteURL = `${prefixURL}/quote-img/quote-img.html?quoteID=${quoteID}`;
   if (tag) {
     quoteURL += `&tag=${tag}`;
   }
@@ -269,7 +266,7 @@ function quoteUrl(quoteID, tag, imageID) {
  */
 function selectQuoteHandler() {
   $('.js-results').on('click', '.js-result-item', function(event) {
-    window.location = $(this).attr('data-url');
+    window.open(($(this).attr('data-url')), '_blank');
   });
 }
 
@@ -281,8 +278,9 @@ function windowResizeHandler() {
   $(window).resize(() => {
     const width = parseFloat($('.js-qotd').css('width'));
     const ratio = parseFloat($('.js-qotd').css('--ratio'));
-    $('.js-qotd').css('height', width * ratio);
+    const height = Math.floor(width * ratio);
+    $('.js-qotd').css('height', height);
     $('.js-qotd-img').css('width', width);
-    $('.js-qotd-img').css('height', width * ratio);
+    $('.js-qotd-img').css('height', height);
   });
 }
