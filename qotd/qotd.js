@@ -23,11 +23,11 @@ const POPULAR_TAGS = [
   "home",
   "nature",
   "happiness",
-  "freedom",
+  "freedom"/*,
   "future",
   "strength",
   "health",
-  "food" 
+  "food" */
 ]
 
 /**
@@ -40,8 +40,9 @@ const POPULAR_TAGS = [
  */
 function searchQuotes(month, day, year, tags) {
   $('.js-qotd-date').html(`- Quote of ${MONTHS[month][1]} ${day}, ${year} -`);
-  // calculate random seed
   $('.js-results, .js-results-main, .js-error-msg').empty();
+  $('.js-qotd, .js-img-attr').addClass('hidden');
+  // calculate random seed
   month = month < 10 ? "0" + month : month;
   day = day < 10 ? "0" + day : day;
   const seed = year.toString().concat(month, day);
@@ -53,21 +54,26 @@ function searchQuotes(month, day, year, tags) {
   const resImage = getRandomImg(tags[tagIdx].name);
   Promise.all([resQuote, resImage])
     .then(res => {
-      const idx = randomIdx(res[0].quotes.length, seed);
-      addQuoteOfTheDay(res[0], idx);
-      if (res[1]) {
-        addImage(res[1]);
-      };
+      const idx = res[0] ? randomIdx(res[0].quotes.length, seed) : null;
+      if (res[0]) {
+        addQuoteOfTheDay(res[0], idx);
+      }
+      addImage(res[1]);
       $('.js-qotd-img').css('display', 'block');
-      if (res[1]) {
+      if (res[0] && res[1]) {
         $('.js-qotd').attr('data-url', quoteUrl(res[0].quotes[idx].id, tags[tagIdx].name, res[1].id));
       }
+      $('.js-qotd, .js-img-attr').removeClass('hidden');
     });
 
   // get quotes of popular tags of the day
   POPULAR_TAGS.forEach((ele, idx) => {
     getQuotes("tag", ele, randomIdx(idx, seed))
-      .then(res => addQuote(res, ele, randomIdx(res.quotes.length, seed)));
+      .then(res => {
+        if (res) {
+          addQuote(res, ele, randomIdx(res.quotes.length, seed));
+        }
+      });
   });
 }
 
@@ -125,7 +131,7 @@ function submitHandler(tags) {
  */
 function selectQotdHandler() {
   $('.js-qotd').on('click', function(event) {
-    window.open($(this).attr('data-url'), '_blank');
+    window.location.href = $(this).attr('data-url');
   });
 }
 

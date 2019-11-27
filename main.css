@@ -4,8 +4,7 @@
 
 body {
   background-color: #1C1C1E;
-  background: -webkit-linear-gradient(rgba(28, 28, 30, 0.1), rgba(28, 28, 30, 0.8)), 
-    -webkit-linear-gradient(rgba(28, 28, 30, 0.5), rgba(28, 28, 30, 0.3)), 
+  background: linear-gradient(rgba(28, 28, 30, 0.8), rgba(28, 28, 30, 0.8)),
     url(images/bg-reg.jpeg);
   background-position: center center;
   background-attachment: fixed;
@@ -130,6 +129,7 @@ nav {
   -moz-background-size: contain;
   -o-background-size: contain;
   background-size: contain;
+  background: rgba(28, 28, 30, 0.5);
 }
 
 .qotd-img {
@@ -156,6 +156,12 @@ nav {
 .img-attr a {
   text-decoration: underline;
   color: #D1D1D6;
+}
+
+.qotd-title {
+  font-size: 1em;
+  color: #96FFD1;
+  margin: 15px;
 }
 
 .results,
@@ -226,6 +232,10 @@ footer p {
 footer p a {
   color: #D1D1D6;
   text-decoration: underline;
+}
+
+.hidden {
+  display: none;
 }
 
 button:focus,
@@ -305,6 +315,9 @@ select:hover {
     top: -2.5px;
     left: 0;
   }
+  .nav-item {
+    text-decoration: underline;
+  }
   .nav-item a i {
     display: none;
   }
@@ -313,6 +326,9 @@ select:hover {
     font-size: 1.5em;
     line-height: 1.5;
     margin: 20px auto;
+  }
+  .qotd-title {
+    font-size: 1.2em;
   }
 }
 

@@ -14,11 +14,11 @@ function getMatchedAuthors(searchTerm, authors) {
   };
   authors.forEach((ele) => {
     if (ele.name_lc.includes(searchTerm)) {
-      if (ele.name_lc == searchTerm) {
+      if (ele.name_lc === searchTerm) {
         resAuthors.result = "exact";
       }
       resAuthors.matchedAuthors[resAuthors.matchedAuthors.length] = ele.name;
-      if (resAuthors.result == "none") {
+      if (resAuthors.result === "none") {
         resAuthors.result = "maybe";
       }
     }
@@ -63,10 +63,10 @@ function displayFilter(searchTerm, resAuthors, tag) {
  */
 function searchWithSearchTerm(s, p, authors, tags) {
   const resAuthors = getMatchedAuthors(s.searchTerm, authors);
-  const tag = tags.find(ele => ele.name == s.searchTerm);
+  const tag = tags.find(ele => ele.name === s.searchTerm);
   displayFilter(s.searchTerm, resAuthors, tag);
   let promise;
-  if (resAuthors.result == "exact") {
+  if (resAuthors.result === "exact") {
     s.type = "author";
     s.searchTerm = resAuthors.matchedAuthors[0];
     promise = newSearch(s.type, s.searchTerm, p);
@@ -75,7 +75,7 @@ function searchWithSearchTerm(s, p, authors, tags) {
     promise = newSearch(s.type, s.searchTerm, p)
       .then(res => {
         if (!res) {
-          if (resAuthors.result == "maybe") {
+          if (resAuthors.result === "maybe") {
             s.type = "author";
             s.searchTerm = resAuthors.matchedAuthors[0];
             newSearch(s.type, s.searchTerm, p);
@@ -103,10 +103,15 @@ function searchWithSearchTerm(s, p, authors, tags) {
  */
 function newSearch(type, searchTerm, p) {
   p.currPage = 1;
+  if (searchTerm) {
+    $('.qotd-title').addClass('hidden');
+  } else {
+    $('.qotd-title').removeClass('hidden');
+  }
   return getQuotes(type, searchTerm, 1)
     .then(res => {
       $('.js-results, .js-bottom-line, .js-error-msg').empty();
-      if (res.quotes[0].id == 0) {
+      if (res.quotes[0].id === 0) {
         p.lastPage = true;
         return false;
       }
@@ -140,7 +145,7 @@ function nextPage(type, searchTerm, p) {
  * @param {object} p the page tracker
  */
 function displayResults(res, type, searchTerm, p) {
-  const tag = type == "tag" ? searchTerm : null;
+  const tag = type === "tag" ? searchTerm : null;
   for (let i = 0; i < res.quotes.length; i++) {
     addQuote(res, tag, i);
   }
@@ -213,7 +218,7 @@ function selectFilterHandler(s, p) {
 function selectTagHandler(s, p) {
   $('.js-results').on('click', '.js-result-tag', function(event) {
     s.searchTerm = $(this).html();
-    if (s.searchTerm == "general") {
+    if (s.searchTerm === "general") {
       s.type = "keyword";
       displayFilter(s.searchTerm, null, null);
     }
