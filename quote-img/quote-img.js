@@ -8,11 +8,15 @@ function getQuoteImage() {
   $('#js-search-term').val(params.tag);
   const resQuote = getQuoteByID(params.quoteID);
   const resImage = params.imageID ? getImageByID(params.imageID) : getRandomImg(params.tag);
+  $('.js-qotd, .js-img-attr').addClass('hidden');
   Promise.all([resQuote, resImage])
     .then(res => {
-      addQuoteOfTheDay(res[0]);
+      if (res[0]) {
+        addQuoteOfTheDay(res[0]);
+      }
       addImage(res[1]);
       $('.js-qotd-img').css('display', 'block');
+      $('.js-qotd, .js-img-attr').removeClass('hidden');
     });
 }
 
@@ -30,7 +34,7 @@ function getParam() {
     const equal = url.indexOf('=', pos);
     const end = url.indexOf('&', pos) != -1 ? url.indexOf('&', pos) : url.length;
     param[url.slice(start, equal)] = url.slice(equal + 1, end);
-    if (end == url.length) {
+    if (end === url.length) {
       break;
     }
     pos = end + 1;

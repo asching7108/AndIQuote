@@ -36,7 +36,7 @@ function getAuthorsAndTags() {
  */
 function parseAuthorsAndTags(responseJson, type, tagMax) {
   const res = [];
-  if (type == "author") {
+  if (type === "author") {
     responseJson.authors.forEach(ele => {
       res.push({
         name: ele.name,
@@ -118,8 +118,13 @@ function makeQuoteRequest(url) {
           throw new Error(res)
         })
         .catch(error => {
-          $('.js-error-msg').html(error);
+          console.log(error);
+          $('.js-error-msg').html("Something went wrong. Please try again later.");
         });
+      throw new Error()
+    })
+    .catch(() => {
+      $('.js-error-msg').html("Something went wrong. Please try again later.");
     })
 }
 
@@ -169,8 +174,12 @@ function makeImageRequest(url) {
         throw new Error(res.errors.join(' '));
       })
       .catch(error => {
-        $('.js-error-msg').html(error);
+        console.log(error);
+        $('.js-error-msg').html("Something went wrong. Please try again later.");
       });
+  })
+  .catch(() => {
+    $('.js-error-msg').html("Something went wrong. Please try again later.");
   })
 }
 
@@ -222,20 +231,28 @@ function addQuoteOfTheDay(res, i) {
  * @param {object} res the response in JSON
  */
 function addImage(res) {
-  const width = parseFloat($('.js-qotd').css('width'));
-  const ratio = res.height / res.width;
+  const width = Math.min(parseFloat($('body').css('width')) * 0.81, 800);
+  let ratio = 0.75;
+  if (res) {
+    ratio = res.height / res.width;
+    $('.js-qotd-img').attr('src', res.urls.regular);
+    $('.js-qotd-img').attr('crossorigin', 'anonymous');
+    const splitIdx = ATTR_URL_I.lastIndexOf('/');
+    const attr_author_url = ATTR_URL_I.slice(0, splitIdx + 1) 
+      + "@" + res.user.username
+      + ATTR_URL_I.slice(splitIdx);
+    $('.js-img-attr')
+      .html(`Photo by <a href="${attr_author_url}" target="_blank">${res.user.name}</a>
+       on <a href="${ATTR_URL_I}" target="_blank">Unsplash</a>`);
+  }
+  else {
+    $('.js-qotd-img').attr('src', '../images/default.png');
+    $('.js-qotd-img').removeAttr('crossorigin');
+  }
   const height = Math.floor(width * ratio);
   $('.js-qotd').css('--ratio', ratio);
   $('.js-qotd').css('height', height);
   $('.js-qotd-img').css('width', width);
-  $('.js-qotd-img').attr('src', res.urls.regular);
-  const splitIdx = ATTR_URL_I.lastIndexOf('/');
-  const attr_author_url = ATTR_URL_I.slice(0, splitIdx + 1) 
-    + "@" + res.user.username
-    + ATTR_URL_I.slice(splitIdx);
-  $('.js-img-attr')
-    .html(`Photo by <a href="${attr_author_url}" target="_blank">${res.user.name}</a>
-     on <a href="${ATTR_URL_I}" target="_blank">Unsplash</a>`);
 }
 
 /**
@@ -265,7 +282,7 @@ function quoteUrl(quoteID, tag, imageID) {
  */
 function selectQuoteHandler() {
   $('.js-results').on('click', '.js-result-item', function(event) {
-    window.open(($(this).attr('data-url')), '_blank');
+    window.location.href = ($(this).attr('data-url'));
   });
 }
 
